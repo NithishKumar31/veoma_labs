@@ -143,44 +143,21 @@ export const Layout: React.FC<LayoutProps> = ({
                 const Icon = item.icon;
                 const isActive = activeTab === item.id || (item.id === 'orders' && activeTab === 'customers');
                 return (
-                  <React.Fragment key={item.id}>
-                    <button
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition cursor-pointer ${
-                        isActive
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
-                      }`}
-                    >
-                      <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
-                      <span>{item.label}</span>
-                    </button>
-
-                    {/* Exclusively show Customers Registry sub-option under Order Management when on orders or customers */}
-                    {item.id === 'orders' && (activeTab === 'orders' || activeTab === 'customers') && (
-                      <button
-                        onClick={() => {
-                          if (onNavigateToCustomerRegistry) {
-                            onNavigateToCustomerRegistry();
-                          } else {
-                            setActiveTab('customers');
-                          }
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center space-x-2.5 pl-8 pr-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-                          activeTab === 'customers'
-                            ? 'bg-blue-700 text-white shadow-xs'
-                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                        }`}
-                      >
-                        <Users size={14} className={activeTab === 'customers' ? 'text-white' : 'text-slate-400'} />
-                        <span>Customers Registry</span>
-                      </button>
-                    )}
-                  </React.Fragment>
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition cursor-pointer ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
+                    <span>{item.label}</span>
+                  </button>
                 );
               })}
           </nav>
