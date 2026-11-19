@@ -35,7 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({
   const navItems = [
     { id: 'dashboard', label: 'Main Dashboard', icon: LayoutDashboard, visible: true },
     { id: 'orders', label: 'Order Management', icon: ShoppingBag, visible: true },
-    { id: 'customers', label: 'Customers Registry', icon: Users, visible: true },
+    { id: 'customers', label: 'Customers Registry', icon: Users, visible: false },
     { id: 'expenses', label: 'Daily Expenses', icon: ReceiptText, visible: true },
     { id: 'workshops', label: 'Workshops & Training', icon: GraduationCap, visible: isSuperAdmin || perms.can_manage_workshops },
     { id: 'inventory', label: 'Inventory & Filaments', icon: Boxes, visible: true },
@@ -116,20 +116,6 @@ export const Layout: React.FC<LayoutProps> = ({
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
-                if (onNavigateToCustomerRegistry) {
-                  onNavigateToCustomerRegistry();
-                } else {
-                  setActiveTab('customers');
-                }
-              }}
-              className="w-full py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium flex items-center justify-center space-x-2 border border-slate-700 transition cursor-pointer"
-            >
-              <Users size={14} className="text-blue-400" />
-              <span>Customer Registry</span>
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
                 onOpenNewOrder();
               }}
               className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 shadow-sm transition"
@@ -155,23 +141,46 @@ export const Layout: React.FC<LayoutProps> = ({
               .filter((item) => item.visible)
               .map((item) => {
                 const Icon = item.icon;
-                const isActive = activeTab === item.id;
+                const isActive = activeTab === item.id || (item.id === 'orders' && activeTab === 'customers');
                 return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition ${
-                      isActive
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
-                    <span>{item.label}</span>
-                  </button>
+                  <React.Fragment key={item.id}>
+                    <button
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
+                      <span>{item.label}</span>
+                    </button>
+
+                    {/* Exclusively show Customers Registry sub-option under Order Management when on orders or customers */}
+                    {item.id === 'orders' && (activeTab === 'orders' || activeTab === 'customers') && (
+                      <button
+                        onClick={() => {
+                          if (onNavigateToCustomerRegistry) {
+                            onNavigateToCustomerRegistry();
+                          } else {
+                            setActiveTab('customers');
+                          }
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center space-x-2.5 pl-8 pr-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
+                          activeTab === 'customers'
+                            ? 'bg-blue-700 text-white shadow-xs'
+                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                        }`}
+                      >
+                        <Users size={14} className={activeTab === 'customers' ? 'text-white' : 'text-slate-400'} />
+                        <span>Customers Registry</span>
+                      </button>
+                    )}
+                  </React.Fragment>
                 );
               })}
           </nav>
@@ -190,7 +199,9 @@ export const Layout: React.FC<LayoutProps> = ({
         <header className="hidden md:flex bg-white border-b border-slate-200 px-6 py-3 items-center justify-between sticky top-0 z-30 shadow-xs">
           <div>
             <h2 className="text-lg font-bold text-slate-800 capitalize">
-              {navItems.find((n) => n.id === activeTab)?.label || 'Dashboard'}
+              {activeTab === 'customers'
+                ? 'Customer Registration & Registry'
+                : navItems.find((n) => n.id === activeTab)?.label || 'Dashboard'}
             </h2>
             <p className="text-xs text-slate-500">
               Veoma Labs Business Management System • Location: Tamil Nadu, India
@@ -198,25 +209,34 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Customer Registry Option with Logo */}
-            <button
-              onClick={() => {
-                if (onNavigateToCustomerRegistry) {
-                  onNavigateToCustomerRegistry();
-                } else {
-                  setActiveTab('customers');
-                }
-              }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border shadow-xs transition cursor-pointer ${
-                activeTab === 'customers'
-                  ? 'bg-blue-50 text-blue-700 border-blue-300'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border-slate-300'
-              }`}
-              title="Navigate directly to Customer Registry & Registration"
-            >
-              <Users size={15} className="text-blue-600" />
-              <span>Customer Registry</span>
-            </button>
+            {/* Customer Registry Option with Logo - EXCLUSIVELY on Order Management page */}
+            {activeTab === 'orders' && (
+              <button
+                onClick={() => {
+                  if (onNavigateToCustomerRegistry) {
+                    onNavigateToCustomerRegistry();
+                  } else {
+                    setActiveTab('customers');
+                  }
+                }}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border shadow-xs transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300"
+                title="Navigate directly to Customer Registry & Registration"
+              >
+                <Users size={15} className="text-blue-600" />
+                <span>Customer Registry</span>
+              </button>
+            )}
+
+            {/* Back button when on Customer Registration page */}
+            {activeTab === 'customers' && (
+              <button
+                onClick={() => setActiveTab('orders')}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border shadow-xs transition cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300"
+              >
+                <ShoppingBag size={15} className="text-blue-600" />
+                <span>← Back to Order Management</span>
+              </button>
+            )}
 
             <button
               onClick={onOpenNewOrder}

@@ -176,6 +176,16 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
             <Plus size={15} />
             <span>+ Quick Register</span>
           </button>
+
+          {onNavigateToOrders && (
+            <button
+              onClick={onNavigateToOrders}
+              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border border-slate-300 transition cursor-pointer"
+            >
+              <ShoppingBag size={14} className="text-blue-600" />
+              <span>← Back to Orders</span>
+            </button>
+          )}
         </div>
       </div>
 
