@@ -88,32 +88,7 @@ def seed_data(db: Session):
             c = ExpenseCategory(name=cat, is_default=True, is_active=True)
             db.add(c)
 
-    # 5. Seed Initial Filament Inventory
-    initial_inventory = [
-        {"material_type": "PLA", "brand": "eSUN", "colour": "Black", "stock": Decimal("2000.00")},
-        {"material_type": "PLA", "brand": "eSUN", "colour": "White", "stock": Decimal("1500.00")},
-        {"material_type": "ABS", "brand": "Numakers", "colour": "Grey", "stock": Decimal("1000.00")},
-        {"material_type": "PETG", "brand": "eSUN", "colour": "Clear", "stock": Decimal("1000.00")},
-        {"material_type": "TPU", "brand": "Sunlu", "colour": "Black", "stock": Decimal("800.00")},
-    ]
-    for inv in initial_inventory:
-        existing_inv = db.query(InventoryItem).filter(
-            InventoryItem.material_type == inv["material_type"],
-            InventoryItem.colour == inv["colour"]
-        ).first()
-        if not existing_inv:
-            item = InventoryItem(
-                material_type=inv["material_type"],
-                brand=inv["brand"],
-                colour=inv["colour"],
-                spool_weight_grams=Decimal("1000.00"),
-                current_stock_grams=inv["stock"],
-                min_threshold_grams=Decimal("300.00"),
-                avg_cost_per_gram=Decimal("1.80")
-            )
-            db.add(item)
-
-    # 6. Seed Company Settings
+    # 5. Seed Company Settings
     settings_dict = {
         "company_name": COMPANY_NAME,
         "company_gstin": COMPANY_GSTIN,
