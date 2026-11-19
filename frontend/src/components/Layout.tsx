@@ -45,7 +45,7 @@ export const Layout: React.FC<LayoutProps> = ({
     { id: 'reports', label: 'Financial Reports (P&L)', icon: BarChart3, visible: isSuperAdmin || perms.can_view_profits },
     { id: 'users', label: 'User Management', icon: ShieldCheck, visible: isSuperAdmin },
     { id: 'audit', label: 'Audit Logs', icon: History, visible: isSuperAdmin },
-    { id: 'settings', label: 'Company Settings', icon: Settings, visible: isSuperAdmin },
+    { id: 'settings', label: 'Company Settings', icon: Settings, visible: false },
   ];
 
   return (
