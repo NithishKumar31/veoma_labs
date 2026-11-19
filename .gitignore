@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.db-journal
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# Uploads & Backups (optional to keep clean)
+backend/uploads/*.png
+backend/uploads/*.jpg
+backend/uploads/*.jpeg
+backend/uploads/*.pdf
+
+# Local environment
+.env
