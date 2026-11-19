@@ -3,12 +3,141 @@
 @layer base {
   body {
     background-color: #f8fafc;
-    color: #0f172a;
+    color: #000000;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 }
 
-/* Custom scrollbars and styling */
+/* ==========================================================================
+   FULL TEXT COLOR CHANGE TO SOLID BLACK (HIGH CONTRAST & READABILITY)
+   ========================================================================== */
+
+/* All primary and secondary text in main views, cards, forms, tables */
+main,
+main h1,
+main h2,
+main h3,
+main h4,
+main h5,
+main h6,
+main p,
+main label,
+main th,
+main td,
+main input,
+main select,
+main textarea,
+main strong,
+main b,
+.bg-white,
+.bg-white p,
+.bg-white label,
+.bg-white th,
+.bg-white td,
+.bg-white h1,
+.bg-white h2,
+.bg-white h3,
+.bg-white h4,
+.bg-slate-50 p,
+.bg-slate-50 th,
+.bg-slate-50 td,
+.bg-slate-50 label {
+  color: #000000;
+}
+
+/* Darken all muted gray / slate text to solid crisp black */
+main .text-slate-400,
+main .text-slate-500,
+main .text-slate-600,
+main .text-slate-700,
+main .text-slate-800,
+main .text-slate-900,
+main .text-gray-400,
+main .text-gray-500,
+main .text-gray-600,
+main .text-gray-700,
+.bg-white .text-slate-400,
+.bg-white .text-slate-500,
+.bg-white .text-slate-600,
+.bg-white .text-slate-700,
+.bg-white .text-slate-800,
+.bg-white .text-slate-900 {
+  color: #000000 !important;
+}
+
+/* Make table headers stand out in deep black with bold weight */
+table th,
+thead th {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Form input text color solid black */
+input,
+select,
+textarea {
+  color: #000000 !important;
+}
+
+/* Preserve intentional colored indicators and financial/status badges */
+.text-emerald-600, .text-emerald-700, .text-emerald-800 { color: #047857 !important; }
+.text-rose-600, .text-rose-700, .text-rose-800 { color: #be123c !important; }
+.text-amber-600, .text-amber-700, .text-amber-800 { color: #b45309 !important; }
+.text-blue-600, .text-blue-700, .text-blue-800 { color: #1d4ed8 !important; }
+.text-indigo-600, .text-indigo-700, .text-indigo-800 { color: #4338ca !important; }
+.text-purple-600, .text-purple-700, .text-purple-800 { color: #6b21a8 !important; }
+.text-cyan-600, .text-cyan-700 { color: #0891b2 !important; }
+
+/* Keep white text on primary action buttons and dark modal headers */
+.text-white,
+.text-white *,
+.bg-blue-600,
+.bg-blue-600 *,
+.bg-blue-700,
+.bg-blue-700 *,
+.bg-slate-900,
+.bg-slate-900 h1,
+.bg-slate-900 h2,
+.bg-slate-900 h3,
+.bg-slate-900 p,
+.bg-slate-900 span,
+.bg-slate-800,
+.bg-slate-800 span,
+.bg-emerald-600,
+.bg-emerald-600 *,
+.bg-rose-600,
+.bg-rose-600 * {
+  color: #ffffff !important;
+}
+
+/* Dark background subtext */
+.bg-slate-900 .text-slate-400,
+.bg-slate-800 .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Sidebar navigation stays crisp and light on dark background */
+aside {
+  color: #e2e8f0 !important;
+}
+aside * {
+  color: inherit;
+}
+aside .text-white {
+  color: #ffffff !important;
+}
+aside .text-cyan-400 {
+  color: #22d3ee !important;
+}
+aside .text-slate-400 {
+  color: #94a3b8 !important;
+}
+aside button.bg-blue-600,
+aside button.bg-blue-600 span {
+  color: #ffffff !important;
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
