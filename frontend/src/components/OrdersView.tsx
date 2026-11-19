@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ShoppingBag, Search, Filter, Plus, ChevronRight, Eye,
-  CreditCard, Scale, CheckCircle2, Clock, AlertTriangle, Trash2, FileText, X
+  CreditCard, Scale, CheckCircle2, Clock, AlertTriangle, Trash2, FileText, X, Users
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Order, User } from '../types';
@@ -12,9 +12,10 @@ import { ReconcileModal } from './ReconcileModal';
 interface OrdersViewProps {
   currentUser: User;
   onOpenCreateOrder: () => void;
+  onNavigateToCustomerRegistry?: () => void;
 }
 
-export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreateOrder }) => {
+export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreateOrder, onNavigateToCustomerRegistry }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -137,6 +138,16 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
         </form>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Customer Registry Option with Logo */}
+          <button
+            onClick={onNavigateToCustomerRegistry}
+            className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border border-slate-300 shadow-xs transition cursor-pointer"
+            title="Navigate to Customer Registry & Registration"
+          >
+            <Users size={15} className="text-blue-600" />
+            <span>Customer Registry</span>
+          </button>
+
           {/* Status Filter */}
           <select
             value={statusFilter}
@@ -350,6 +361,18 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                   <p className="text-slate-600">Phone: {selectedOrder.customer_phone}</p>
                   {selectedOrder.place_of_supply && (
                     <p className="text-slate-600">Place of Supply: {selectedOrder.place_of_supply}</p>
+                  )}
+                  {onNavigateToCustomerRegistry && (
+                    <button
+                      onClick={() => {
+                        setSelectedOrder(null);
+                        onNavigateToCustomerRegistry();
+                      }}
+                      className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center space-x-1 transition cursor-pointer"
+                    >
+                      <Users size={13} />
+                      <span>Open Customer Registry & Records →</span>
+                    </button>
                   )}
                 </div>
 

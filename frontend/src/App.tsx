@@ -24,6 +24,11 @@ export function App() {
   // Global Modals
   const [createOrderModalOpen, setCreateOrderModalOpen] = useState(false);
   const [quickExpenseModalOpen, setQuickExpenseModalOpen] = useState(false);
+  const [openCustomerModal, setOpenCustomerModal] = useState(false);
+
+  const handleNavigateToCustomerRegistry = () => {
+    setActiveTab('customers');
+  };
 
   useEffect(() => {
     const savedUser = localStorage.getItem('veoma_user');
@@ -69,15 +74,23 @@ export function App() {
         onLogout={handleLogout}
         onOpenNewOrder={() => setCreateOrderModalOpen(true)}
         onOpenQuickExpense={() => setQuickExpenseModalOpen(true)}
+        onNavigateToCustomerRegistry={handleNavigateToCustomerRegistry}
       >
         {activeTab === 'dashboard' && <DashboardView />}
         {activeTab === 'orders' && (
           <OrdersView
             currentUser={currentUser}
             onOpenCreateOrder={() => setCreateOrderModalOpen(true)}
+            onNavigateToCustomerRegistry={handleNavigateToCustomerRegistry}
           />
         )}
-        {activeTab === 'customers' && <CustomersView />}
+        {activeTab === 'customers' && (
+          <CustomersView
+            initialOpenRegister={openCustomerModal}
+            onRegisterClosed={() => setOpenCustomerModal(false)}
+            onNavigateToOrders={() => setActiveTab('orders')}
+          />
+        )}
         {activeTab === 'expenses' && (
           <ExpensesView
             currentUser={currentUser}

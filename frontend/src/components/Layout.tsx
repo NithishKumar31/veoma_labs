@@ -13,6 +13,7 @@ interface LayoutProps {
   onLogout: () => void;
   onOpenNewOrder: () => void;
   onOpenQuickExpense: () => void;
+  onNavigateToCustomerRegistry?: () => void;
   children: React.ReactNode;
 }
 
@@ -23,6 +24,7 @@ export const Layout: React.FC<LayoutProps> = ({
   onLogout,
   onOpenNewOrder,
   onOpenQuickExpense,
+  onNavigateToCustomerRegistry,
   children
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -114,6 +116,20 @@ export const Layout: React.FC<LayoutProps> = ({
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
+                if (onNavigateToCustomerRegistry) {
+                  onNavigateToCustomerRegistry();
+                } else {
+                  setActiveTab('customers');
+                }
+              }}
+              className="w-full py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium flex items-center justify-center space-x-2 border border-slate-700 transition cursor-pointer"
+            >
+              <Users size={14} className="text-blue-400" />
+              <span>Customer Registry</span>
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
                 onOpenNewOrder();
               }}
               className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 shadow-sm transition"
@@ -182,16 +198,36 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           <div className="flex items-center space-x-3">
+            {/* Customer Registry Option with Logo */}
+            <button
+              onClick={() => {
+                if (onNavigateToCustomerRegistry) {
+                  onNavigateToCustomerRegistry();
+                } else {
+                  setActiveTab('customers');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border shadow-xs transition cursor-pointer ${
+                activeTab === 'customers'
+                  ? 'bg-blue-50 text-blue-700 border-blue-300'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border-slate-300'
+              }`}
+              title="Navigate directly to Customer Registry & Registration"
+            >
+              <Users size={15} className="text-blue-600" />
+              <span>Customer Registry</span>
+            </button>
+
             <button
               onClick={onOpenNewOrder}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-xs transition"
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-xs transition cursor-pointer"
             >
               <PlusCircle size={15} />
               <span>Create Order</span>
             </button>
             <button
               onClick={onOpenQuickExpense}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center space-x-1.5 border border-slate-300 transition"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center space-x-1.5 border border-slate-300 transition cursor-pointer"
             >
               <ReceiptText size={15} />
               <span>Log Expense</span>
