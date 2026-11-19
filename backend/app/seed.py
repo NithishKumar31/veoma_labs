@@ -16,10 +16,8 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 def seed_data(db: Session):
-    # 1. Seed Initial Users (Super Admin, Sub Admin 1, Sub Admin 2)
+    # 1. Seed Initial Admin User
     super_admin_pwd = os.getenv("SUPERADMIN_PASSWORD", "Veoma@Admin2026")
-    sub1_pwd = os.getenv("SUBADMIN1_PASSWORD", "SubAdmin1@2026")
-    sub2_pwd = os.getenv("SUBADMIN2_PASSWORD", "SubAdmin2@2026")
 
     existing_users = {u.username: u for u in db.query(User).all()}
 
@@ -44,50 +42,6 @@ def seed_data(db: Session):
         )
         db.add(admin)
         print("-> Created Super Admin account: admin")
-
-    if "subadmin1" not in existing_users:
-        sub1 = User(
-            username="subadmin1",
-            email="subadmin1@veomalabs.com",
-            full_name="Operations Sub Admin 1",
-            role="SUB_ADMIN",
-            permissions={
-                "can_view_profits": False,
-                "can_view_salaries": False,
-                "can_view_gst": False,
-                "can_manage_users": False,
-                "can_delete_financials": False,
-                "can_manage_inventory": True,
-                "can_manage_workshops": True,
-                "can_backup_database": False
-            },
-            password_hash=get_password_hash(sub1_pwd),
-            is_active=True
-        )
-        db.add(sub1)
-        print("-> Created Sub Admin 1 account: subadmin1")
-
-    if "subadmin2" not in existing_users:
-        sub2 = User(
-            username="subadmin2",
-            email="subadmin2@veomalabs.com",
-            full_name="Operations Sub Admin 2",
-            role="SUB_ADMIN",
-            permissions={
-                "can_view_profits": False,
-                "can_view_salaries": False,
-                "can_view_gst": False,
-                "can_manage_users": False,
-                "can_delete_financials": False,
-                "can_manage_inventory": False,
-                "can_manage_workshops": False,
-                "can_backup_database": False
-            },
-            password_hash=get_password_hash(sub2_pwd),
-            is_active=True
-        )
-        db.add(sub2)
-        print("-> Created Sub Admin 2 account: subadmin2")
 
     # 2. Seed Printers
     initial_printers = [

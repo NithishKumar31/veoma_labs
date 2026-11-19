@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Plus, Check, X, Lock, Key, UserCheck, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Plus, Check, X, Lock, Key, UserCheck, AlertCircle, Trash2 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { User } from '../types';
 import { formatDate } from '../utils/formatters';
@@ -82,6 +82,20 @@ export const UserManagementView: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (u: User) => {
+    if (u.username === 'admin') {
+      alert('The primary Super Admin account cannot be deleted.');
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to permanently delete user "${u.username}"?`)) return;
+    try {
+      await apiClient.deleteUser(u.id);
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to delete user');
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Header Bar */}
@@ -117,6 +131,7 @@ export const UserManagementView: React.FC = () => {
                 <th className="px-4 py-3">Inventory Adjust</th>
                 <th className="px-4 py-3">Workshops Manage</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -219,6 +234,18 @@ export const UserManagementView: React.FC = () => {
                       >
                         {u.is_active ? 'Active' : 'Disabled'}
                       </button>
+                    </td>
+
+                    <td className="px-4 py-3 text-right">
+                      {u.username !== 'admin' && (
+                        <button
+                          onClick={() => handleDeleteUser(u)}
+                          className="p-1.5 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
+                          title="Delete User"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

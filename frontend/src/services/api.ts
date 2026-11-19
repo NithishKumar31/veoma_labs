@@ -57,6 +57,10 @@ export const apiClient = {
     const res = await api.put(`/api/users/${id}`, user);
     return res.data;
   },
+  deleteUser: async (id: string): Promise<any> => {
+    const res = await api.delete(`/api/users/${id}`);
+    return res.data;
+  },
 
   // Customers
   listCustomers: async (search?: string): Promise<Customer[]> => {
