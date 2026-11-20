@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import (
@@ -18,6 +19,7 @@ from ..services.calculation import (
     calculate_production_item_cost, calculate_order_totals,
     suggest_selling_price, round_money
 )
+from ..services.invoice_pdf import generate_invoice_pdf
 from ..config import SUPPLIER_STATE
 
 router = APIRouter(prefix="/api/orders", tags=["Orders & Production"])
@@ -540,3 +542,103 @@ def delete_order(
     )
     db.commit()
     return {"message": f"Order {order_code} successfully deleted"}
+
+def _build_invoice_payload(order: Order) -> dict:
+    # Build line items
+    items = []
+    if order.designing_required and order.designing_cost > 0:
+        items.append({
+            "description": f"Designing ({order.model_name})",
+            "qty": "1 job",
+            "price": order.designing_cost,
+            "total": order.designing_cost
+        })
+
+    printing_price = order.agreed_selling_price - (order.designing_cost if order.designing_required else Decimal("0.00"))
+    if printing_price <= Decimal("0.00"):
+        printing_price = order.agreed_selling_price
+
+    items.append({
+        "description": f"Printing({order.model_name})",
+        "qty": f"{order.quantity} pcs" if order.quantity > 1 else "1 job",
+        "price": printing_price,
+        "total": printing_price
+    })
+
+    # Calculations
+    subtotal = order.taxable_value if order.gst_applicable and order.taxable_value > 0 else order.agreed_selling_price
+    gst_val = (order.cgst_amount + order.sgst_amount + order.igst_amount) if order.gst_applicable else Decimal("0.00")
+    total_val = subtotal + gst_val
+    courier_val = order.courier_charge
+    grand_total = total_val + courier_val
+
+    cust = order.customer
+    inv_no = order.invoice_number or f"ELA{order.order_date.strftime('%Y%m')}{order.order_id[-3:] if len(order.order_id) >= 3 else '001'}"
+
+    return {
+        "order_id": order.order_id,
+        "company_name": "ELARCHI LABS",
+        "company_gstin": "33HGMPK9319D1Z7",
+        "company_address": "97, Kundalakeshi street, Camp road, Tambaram",
+        "account_no": "282101000006844",
+        "account_name": "GOKUL K",
+        "branch_name": "SELAIYUR, IOB",
+        "phone": "+91 70101 77745",
+        "email": "layercraft3dprint@gmail.com",
+        "signatory_name": "GOKUL KITTUSAMY",
+        "signatory_title": "Founder & CEO",
+        "notice": "***Seperate shipping charges will be applicable",
+        "invoice_no": inv_no,
+        "invoice_date": order.order_date.strftime("%d/%m/%Y"),
+        "customer_name": (cust.name if cust else order.customer_name).upper(),
+        "customer_address": (cust.address if cust and cust.address else (order.place_of_supply or "Tamil Nadu")).upper(),
+        "customer_gstin": cust.gstin if cust and cust.gstin else None,
+        "items": items,
+        "subtotal": subtotal,
+        "gst": gst_val,
+        "total": total_val,
+        "courier_charge": courier_val,
+        "grand_total": grand_total
+    }
+
+@router.get("/{order_id}/invoice-data")
+def get_order_invoice_data(
+    order_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    order = db.query(Order).filter((Order.id == order_id) | (Order.order_id == order_id)).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    payload = _build_invoice_payload(order)
+    # Convert Decimals to floats for JSON serialization
+    payload["subtotal"] = float(payload["subtotal"])
+    payload["gst"] = float(payload["gst"])
+    payload["total"] = float(payload["total"])
+    payload["courier_charge"] = float(payload["courier_charge"])
+    payload["grand_total"] = float(payload["grand_total"])
+    for itm in payload["items"]:
+        itm["price"] = float(itm["price"])
+        itm["total"] = float(itm["total"])
+    return payload
+
+@router.get("/{order_id}/invoice-pdf")
+def download_order_invoice_pdf(
+    order_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    order = db.query(Order).filter((Order.id == order_id) | (Order.order_id == order_id)).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    payload = _build_invoice_payload(order)
+    pdf_stream = generate_invoice_pdf(payload)
+
+    filename = f"Invoice_{payload['invoice_no']}.pdf"
+    return StreamingResponse(
+        pdf_stream,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'}
+    )

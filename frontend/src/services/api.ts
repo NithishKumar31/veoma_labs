@@ -113,6 +113,14 @@ export const apiClient = {
     const res = await api.delete(`/api/orders/${orderId}`);
     return res.data;
   },
+  getOrderInvoiceData: async (orderId: string) => {
+    const res = await api.get(`/api/orders/${orderId}/invoice-data`);
+    return res.data;
+  },
+  getOrderInvoicePdfUrl: (orderId: string) => {
+    const token = localStorage.getItem('veoma_token');
+    return `/api/orders/${orderId}/invoice-pdf?token=${token || ''}`;
+  },
 
   // Inventory
   listInventory: async (materialType?: string): Promise<InventoryItem[]> => {

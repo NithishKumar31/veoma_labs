@@ -8,6 +8,7 @@ import { Order, User } from '../types';
 import { formatCurrency, formatDate, formatDateTime, formatWeight } from '../utils/formatters';
 import { PaymentModal } from './PaymentModal';
 import { ReconcileModal } from './ReconcileModal';
+import { InvoiceModal } from './InvoiceModal';
 
 interface OrdersViewProps {
   currentUser: User;
@@ -28,6 +29,8 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
   // Modals
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [reconcileModalOpen, setReconcileModalOpen] = useState(false);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
 
   const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
 
@@ -249,15 +252,29 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                     <td className="px-4 py-3">{getStatusBadge(o.order_status)}</td>
                     <td className="px-4 py-3">{getPaymentBadge(o.payment_status)}</td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(o);
-                        }}
-                        className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100"
-                      >
-                        <ChevronRight size={18} />
-                      </button>
+                      <div className="flex items-center justify-end space-x-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInvoiceOrder(o);
+                            setInvoiceModalOpen(true);
+                          }}
+                          className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded font-bold text-[11px] flex items-center space-x-1 border border-purple-200 transition cursor-pointer"
+                          title="View & Print Official Bill"
+                        >
+                          <FileText size={12} />
+                          <span>Bill</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrder(o);
+                          }}
+                          className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100"
+                        >
+                          <ChevronRight size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -334,8 +351,20 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
 
                 <div className="flex items-center space-x-2 ml-auto">
                   <button
+                    onClick={() => {
+                      setInvoiceOrder(selectedOrder);
+                      setInvoiceModalOpen(true);
+                    }}
+                    className="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded font-bold flex items-center space-x-1.5 shadow-xs transition cursor-pointer"
+                    title="View and Print Official Bill (Elarchi Labs)"
+                  >
+                    <FileText size={14} />
+                    <span>View / Print Bill</span>
+                  </button>
+
+                  <button
                     onClick={() => setPaymentModalOpen(true)}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold flex items-center space-x-1"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold flex items-center space-x-1 cursor-pointer"
                   >
                     <CreditCard size={14} />
                     <span>+ Record Payment</span>
@@ -554,6 +583,13 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
         isOpen={reconcileModalOpen}
         onClose={() => setReconcileModalOpen(false)}
         onReconcileSuccess={fetchOrders}
+      />
+
+      {/* Official Bill / Invoice Modal (Exact Elarchi Labs Format) */}
+      <InvoiceModal
+        order={invoiceOrder}
+        isOpen={invoiceModalOpen}
+        onClose={() => setInvoiceModalOpen(false)}
       />
     </div>
   );

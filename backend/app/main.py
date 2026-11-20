@@ -75,7 +75,8 @@ if FRONTEND_DIST.exists():
     async def serve_frontend(full_path: str):
         # Don't intercept API or upload routes
         if full_path.startswith("api") or full_path.startswith("uploads") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
-            return None
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not Found")
         file_path = FRONTEND_DIST / full_path
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)
