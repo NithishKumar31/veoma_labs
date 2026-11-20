@@ -573,11 +573,11 @@ def _build_invoice_payload(order: Order) -> dict:
     grand_total = total_val + courier_val
 
     cust = order.customer
-    inv_no = order.invoice_number or f"ELA{order.order_date.strftime('%Y%m')}{order.order_id[-3:] if len(order.order_id) >= 3 else '001'}"
+    inv_no = order.invoice_number or f"VOM{order.order_date.strftime('%Y%m')}{order.order_id[-3:] if len(order.order_id) >= 3 else '001'}"
 
     return {
         "order_id": order.order_id,
-        "company_name": "ELARCHI LABS",
+        "company_name": "VEOMA LABS",
         "company_gstin": "33HGMPK9319D1Z7",
         "company_address": "97, Kundalakeshi street, Camp road, Tambaram",
         "account_no": "282101000006844",

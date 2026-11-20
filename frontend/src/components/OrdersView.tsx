@@ -356,7 +356,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                       setInvoiceModalOpen(true);
                     }}
                     className="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded font-bold flex items-center space-x-1.5 shadow-xs transition cursor-pointer"
-                    title="View and Print Official Bill (Elarchi Labs)"
+                    title="View and Print Official Bill (Veoma Labs)"
                   >
                     <FileText size={14} />
                     <span>View / Print Bill</span>
@@ -585,7 +585,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
         onReconcileSuccess={fetchOrders}
       />
 
-      {/* Official Bill / Invoice Modal (Exact Elarchi Labs Format) */}
+      {/* Official Bill / Invoice Modal (Veoma Labs Format) */}
       <InvoiceModal
         order={invoiceOrder}
         isOpen={invoiceModalOpen}

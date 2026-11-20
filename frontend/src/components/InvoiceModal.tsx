@@ -16,7 +16,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   const [isEditing, setIsEditing] = useState(false);
 
   // Editable Overrides
-  const [companyName, setCompanyName] = useState('ELARCHI LABS');
+  const [companyName, setCompanyName] = useState('VEOMA LABS');
   const [companyGstin, setCompanyGstin] = useState('33HGMPK9319D1Z7');
   const [companyAddress, setCompanyAddress] = useState('97, Kundalakeshi street, Camp road, Tambaram');
   const [paymentMethod, setPaymentMethod] = useState('CASH / BANK');
@@ -62,7 +62,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
     window.open(url, '_blank');
   };
 
-  const invoiceNo = invoiceData?.invoice_no || `ELA${order.order_id.replace(/[^0-9]/g, '').slice(-7) || '2026017'}`;
+  const invoiceNo = invoiceData?.invoice_no || `VOM${order.order_id.replace(/[^0-9]/g, '').slice(-7) || '2026017'}`;
   const invoiceDate = invoiceData?.invoice_date || new Date(order.order_date).toLocaleDateString('en-GB');
 
   const customerName = invoiceData?.customer_name || order.customer_name || 'SRI SAMVARDHINI ,';
@@ -269,15 +269,12 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
               {/* RIGHT: Company Name, INVOICE, Date & Banking Details */}
               <div className="w-1/2 pl-4 text-right text-xs">
                 
-                {/* 3D Cyan Isometric Logo & Company Name */}
+                {/* Veoma Labs Logo & Company Name */}
                 <div className="flex items-center justify-end space-x-3 mb-1">
-                  {/* Cyan / Blue 3D Cube Icon */}
-                  <svg className="w-9 h-9" viewBox="0 0 40 40" fill="none">
-                    <polygon points="4,10 20,2 20,30 4,38" fill="#00c5d7" />
-                    <polygon points="20,2 36,10 36,38 20,30" fill="#0288d1" />
-                    <polygon points="20,16 30,10 30,24 20,30" fill="#ffffff" opacity="0.3" />
-                    <circle cx="28" cy="22" r="3" fill="#ffffff" />
-                  </svg>
+                  {/* Veoma Squircle V Icon */}
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-black text-white text-xl shadow-md select-none">
+                    V
+                  </div>
                   <div>
                     <h1 className="text-2xl font-black text-slate-950 tracking-wide uppercase leading-none">
                       {companyName}

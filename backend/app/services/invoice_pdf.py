@@ -103,7 +103,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     # =========================================================================
     # 3. COMPANY BRANDING & LOGO (TOP RIGHT)
     # =========================================================================
-    company_name = order_data.get("company_name", "ELARCHI LABS")
+    company_name = order_data.get("company_name", "VEOMA LABS")
     gstin = order_data.get("company_gstin", "33HGMPK9319D1Z7")
     address = order_data.get("company_address", "97, Kundalakeshi street, Camp road, Tambaram")
     account_no = order_data.get("account_no", "282101000006844")
@@ -115,32 +115,19 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     signatory_title = order_data.get("signatory_title", "Founder & CEO")
     notice = order_data.get("notice", "***Seperate shipping charges will be applicable")
 
-    # Draw Cyan 3D Isometric Logo (Left of company name)
-    logo_x = 265
+    # Draw Veoma Labs Squircle Logo with 'V' (Left of company name)
+    logo_size = 32
+    name_width = c.stringWidth(company_name, "Helvetica-Bold", 20)
+    logo_x = (width - 50) - name_width - logo_size - 12
     logo_y = 705
-    # Left face
-    lf = c.beginPath()
-    lf.moveTo(logo_x, logo_y)
-    lf.lineTo(logo_x + 18, logo_y + 11)
-    lf.lineTo(logo_x + 18, logo_y + 38)
-    lf.lineTo(logo_x, logo_y + 27)
-    lf.close()
-    c.setFillColor(CYAN_LIGHT)
-    c.drawPath(lf, fill=1, stroke=0)
 
-    # Right face
-    rf = c.beginPath()
-    rf.moveTo(logo_x + 22, logo_y + 11)
-    rf.lineTo(logo_x + 40, logo_y)
-    rf.lineTo(logo_x + 40, logo_y + 27)
-    rf.lineTo(logo_x + 22, logo_y + 38)
-    rf.close()
-    c.setFillColor(CYAN_DARK)
-    c.drawPath(rf, fill=1, stroke=0)
-
-    # Logo cut-out accent
+    # Rounded squircle background with rich blue/cyan styling
+    c.setFillColor(colors.HexColor("#2563eb"))
+    c.roundRect(logo_x, logo_y, logo_size, logo_size, 7, fill=1, stroke=0)
+    # White 'V' in the center
     c.setFillColor(colors.white)
-    c.circle(logo_x + 31, logo_y + 20, 3.5, fill=1, stroke=0)
+    c.setFont("Helvetica-Bold", 19)
+    c.drawCentredString(logo_x + (logo_size / 2), logo_y + 8, "V")
 
     # Company Name & INVOICE
     c.setFillColor(TEXT_BLACK)
@@ -152,7 +139,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     # Quotation Date & Invoice No
     c.setFont("Helvetica", 9)
     inv_date = order_data.get("invoice_date", datetime.utcnow().strftime("%d/%m/%Y"))
-    inv_no = order_data.get("invoice_no", "ELA2026017")
+    inv_no = order_data.get("invoice_no", "VOM2026017")
     c.drawRightString(width - 50, 686, f"Quotation Date: {inv_date}")
     c.drawRightString(width - 50, 672, f"Invoice no : {inv_no}")
 
