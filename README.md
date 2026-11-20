@@ -170,3 +170,5 @@ The automated pytest suite (`backend/tests/`) verifies all critical workflows:
 ## 9. License & Business Notice
 
 Developed specifically for **Veoma Labs**, Tamil Nadu, India. All rights reserved.
+#   v e o m a _ l a b s  
+ 
