@@ -136,11 +136,11 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     c.setFont("Helvetica", 11)
     c.drawRightString(width - 50, 708, "INVOICE")
 
-    # Quotation Date & Invoice No
+    # Invoice Date & Invoice No
     c.setFont("Helvetica", 9)
     inv_date = order_data.get("invoice_date", datetime.utcnow().strftime("%d/%m/%Y"))
     inv_no = order_data.get("invoice_no", "VOM2026017")
-    c.drawRightString(width - 50, 686, f"Quotation Date: {inv_date}")
+    c.drawRightString(width - 50, 686, f"Invoice Date: {inv_date}")
     c.drawRightString(width - 50, 672, f"Invoice no : {inv_no}")
 
     # GST & Address Details

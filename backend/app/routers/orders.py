@@ -191,7 +191,7 @@ def create_order(
             custom_post_rate=post_rate
         )
         calculated_items_data.append({
-            "printer_id": item.printer_id,
+            "printer_id": item.printer_id.strip() if item.printer_id and item.printer_id.strip() else None,
             "material_type": mat_type,
             "printing_hours": item.printing_hours,
             "notes": item.notes,
@@ -259,7 +259,7 @@ def create_order(
     for c_item in calculated_items_data:
         p_item = OrderProductionItem(
             order_id=order.id,
-            printer_id=c_item["printer_id"],
+            printer_id=c_item["printer_id"] if c_item.get("printer_id") else None,
             material_type=c_item["material_type"],
             model_weight_grams=c_item["model_weight_grams"],
             wastage_percentage=c_item["wastage_percentage"],

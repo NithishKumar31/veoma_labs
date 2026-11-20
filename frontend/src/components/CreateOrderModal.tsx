@@ -221,7 +221,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
         packing_cost: Number(packingCost),
         other_direct_costs: Number(otherDirectCosts),
         production_items: productionItems.map((p) => ({
-          printer_id: p.printer_id || undefined,
+          printer_id: p.printer_id && p.printer_id.trim() !== '' ? p.printer_id.trim() : undefined,
           material_type: p.material_type,
           model_weight_grams: Number(p.model_weight_grams),
           wastage_percentage: Number(p.wastage_percentage),
@@ -247,7 +247,17 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
       onOrderCreated();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to create order');
+      let errMsg = 'Failed to create order';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errMsg = err.response.data.detail;
+        } else if (Array.isArray(err.response.data.detail)) {
+          errMsg = err.response.data.detail.map((d: any) => `${d.loc?.slice(-1)[0] || 'field'}: ${d.msg}`).join(', ');
+        }
+      } else if (err.message) {
+        errMsg = err.message;
+      }
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

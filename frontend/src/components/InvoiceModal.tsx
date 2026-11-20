@@ -324,7 +324,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
                 {/* Date & Invoice No */}
                 <div className="text-[11px] text-slate-800 mt-3 space-y-0.5 font-medium">
-                  <p>Quotation Date: <span className="font-semibold">{invoiceDate}</span></p>
+                  <p>Invoice Date: <span className="font-semibold">{invoiceDate}</span></p>
                   <p>Invoice no : <span className="font-semibold">{invoiceNo}</span></p>
                 </div>
 

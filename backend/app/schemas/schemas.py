@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 # ----------------- Auth & Users -----------------
 class Token(BaseModel):
@@ -119,6 +119,13 @@ class OrderProductionItemCreate(BaseModel):
     printing_hours: Optional[Decimal] = None
     notes: Optional[str] = None
 
+    @field_validator("printer_id", mode="before")
+    @classmethod
+    def empty_printer_to_none(cls, v):
+        if not v or (isinstance(v, str) and not v.strip()):
+            return None
+        return v
+
 class OrderProductionItemResponse(BaseModel):
     id: str
     order_id: str
@@ -198,6 +205,13 @@ class OrderCreate(BaseModel):
     # Initial advance payment (optional)
     initial_payment: Optional[OrderPaymentCreate] = None
     production_notes: Optional[str] = None
+
+    @field_validator("expected_delivery_date", "image_url", "description", "production_notes", "customer_email", "customer_address", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "" or (isinstance(v, str) and not v.strip()):
+            return None
+        return v
 
 class OrderStatusUpdate(BaseModel):
     order_status: str
