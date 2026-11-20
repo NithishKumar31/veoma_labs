@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Printer, Download, Edit3, Check, CheckCircle2 } from 'lucide-react';
+import { X, Printer, Download, Edit3, Check, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Order } from '../types';
 import signatureImg from '../assets/signature.png';
@@ -51,6 +51,21 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
     }
   }, [isOpen, order]);
 
+  // Press Escape to exit modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !order) return null;
 
   const handlePrint = () => {
@@ -91,15 +106,37 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   const grandTotal = invoiceData?.grand_total ?? (total + courierCharge);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-[850px] my-6 overflow-hidden flex flex-col print:border-none print:shadow-none print:my-0 print:max-w-none">
+    <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-start justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static">
+      
+      {/* Floating Always-Visible Back Button (Fixed in Top-Left) */}
+      <button
+        onClick={onClose}
+        className="fixed top-4 left-4 z-[60] bg-slate-900/95 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 shadow-2xl border border-slate-700 backdrop-blur-md transition-all hover:scale-105 cursor-pointer print:hidden group"
+        title="Exit to Orders (Esc)"
+      >
+        <ArrowLeft size={16} className="text-cyan-400 group-hover:-translate-x-1 transition-transform" />
+        <span>Back to Orders</span>
+      </button>
+
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-[850px] my-4 sm:my-8 overflow-hidden flex flex-col print:border-none print:shadow-none print:my-0 print:max-w-none">
         
-        {/* Top Control Bar (Hidden in Print) */}
-        <div className="bg-slate-900 text-white px-5 py-3 flex items-center justify-between print:hidden">
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-            <h3 className="text-sm font-bold tracking-wide">Official Invoice & Bill Preview</h3>
-            <span className="text-[11px] text-slate-400">({invoiceNo})</span>
+        {/* Sticky Top Control Bar (Hidden in Print) */}
+        <div className="sticky top-0 z-30 bg-slate-900 text-white px-4 sm:px-6 py-3 flex items-center justify-between border-b border-slate-800 shadow-md print:hidden">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onClose}
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 border border-slate-700 transition cursor-pointer shadow-xs"
+              title="Back to Orders (Esc)"
+            >
+              <ArrowLeft size={15} className="text-cyan-400" />
+              <span>Back</span>
+            </button>
+
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+              <h3 className="text-sm font-bold tracking-wide">Official Invoice & Bill Preview</h3>
+              <span className="text-[11px] text-slate-400">({invoiceNo})</span>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -459,6 +496,34 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             </svg>
           </div>
 
+        </div>
+
+        {/* Bottom Exit & Action Bar (Hidden in Print) */}
+        <div className="bg-slate-100 border-t border-slate-200 px-6 py-3.5 flex items-center justify-between print:hidden">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center space-x-2 shadow-sm transition cursor-pointer"
+          >
+            <ArrowLeft size={16} className="text-cyan-400" />
+            <span>Back to Orders</span>
+          </button>
+
+          <div className="flex items-center space-x-2.5">
+            <button
+              onClick={handlePrint}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition cursor-pointer"
+            >
+              <Printer size={15} />
+              <span>Print Bill</span>
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition cursor-pointer"
+            >
+              <Download size={15} />
+              <span>Download PDF</span>
+            </button>
+          </div>
         </div>
 
       </div>
