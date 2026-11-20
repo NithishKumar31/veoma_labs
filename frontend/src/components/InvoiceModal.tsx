@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Printer, Download, Edit3, Check, CheckCircle2 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Order } from '../types';
+import signatureImg from '../assets/signature.png';
 
 interface InvoiceModalProps {
   order: Order | null;
@@ -413,25 +414,23 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             </div>
 
             {/* Right Signature & Signatory */}
-            <div className="text-center pr-8">
-              {/* Cursive Signature Graphic */}
-              <div className="mb-1 flex justify-center">
-                <svg className="w-28 h-10" viewBox="0 0 120 45" fill="none">
-                  <path
-                    d="M10,32 C25,12 40,8 55,25 C65,36 80,10 95,28 C105,38 112,18 118,22"
-                    stroke="#111827"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <line x1="30" y1="28" x2="105" y2="28" stroke="#111827" strokeWidth="1.6" />
-                </svg>
+            <div className="text-center pr-8 min-w-[200px]">
+              {/* Authentic Cursive Signature Graphic */}
+              <div className="mb-1 flex justify-center items-center h-14">
+                <img
+                  src={signatureImg}
+                  alt="Authorized Signature"
+                  className="h-12 w-auto object-contain pointer-events-none select-none"
+                />
               </div>
 
-              <p className="font-black text-slate-950 text-xs tracking-wider uppercase">
+              {/* Horizontal divider line under signature */}
+              <div className="w-48 border-t-2 border-slate-900 mx-auto my-1.5"></div>
+
+              <p className="font-black text-slate-950 text-sm tracking-wide uppercase">
                 {signatoryName}
               </p>
-              <p className="text-[11px] font-semibold text-slate-700">
+              <p className="text-xs font-semibold text-slate-800">
                 {signatoryTitle}
               </p>
             </div>

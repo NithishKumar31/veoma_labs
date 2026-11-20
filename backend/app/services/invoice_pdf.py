@@ -1,4 +1,5 @@
 import io
+import os
 from decimal import Decimal
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
@@ -305,23 +306,31 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     c.setFillColor(TEXT_MUTED)
     c.drawString(50, footer_y + 4, notice)
 
-    # Right: Hand-drawn Style Signature & Signatory
+    # Right: Hand-drawn Authentic Signature & Signatory
     sig_center_x = width - 140
-    c.setStrokeColor(TEXT_BLACK)
-    c.setLineWidth(1.3)
 
-    # Cursive signature curve for "Gokul K"
-    s_path = c.beginPath()
-    s_path.moveTo(sig_center_x - 35, footer_y + 50)
-    s_path.curveTo(sig_center_x - 20, footer_y + 65, sig_center_x - 10, footer_y + 68, sig_center_x - 5, footer_y + 50)
-    s_path.curveTo(sig_center_x, footer_y + 40, sig_center_x + 15, footer_y + 62, sig_center_x + 25, footer_y + 50)
-    s_path.curveTo(sig_center_x + 30, footer_y + 45, sig_center_x + 35, footer_y + 42, sig_center_x + 40, footer_y + 48)
-    c.drawPath(s_path, fill=0, stroke=1)
-    c.line(sig_center_x - 15, footer_y + 47, sig_center_x + 35, footer_y + 47)
+    sig_img_path = os.path.join(os.path.dirname(__file__), "..", "assets", "signature.png")
+    if os.path.exists(sig_img_path):
+        sig_w = 76
+        sig_h = 76 * (128 / 228)  # ~42.7 points
+        c.drawImage(
+            sig_img_path,
+            sig_center_x - (sig_w / 2),
+            footer_y + 46,
+            width=sig_w,
+            height=sig_h,
+            mask="auto",
+            preserveAspectRatio=True,
+        )
+
+    # Solid horizontal divider line under signature (matching reference)
+    c.setStrokeColor(TEXT_BLACK)
+    c.setLineWidth(1.1)
+    c.line(sig_center_x - 65, footer_y + 43, sig_center_x + 65, footer_y + 43)
 
     c.setFont("Helvetica-Bold", 10.5)
     c.setFillColor(TEXT_BLACK)
-    c.drawCentredString(sig_center_x, footer_y + 26, signatory)
+    c.drawCentredString(sig_center_x, footer_y + 26, signatory.upper())
     c.setFont("Helvetica", 8.5)
     c.drawCentredString(sig_center_x, footer_y + 12, signatory_title)
 
