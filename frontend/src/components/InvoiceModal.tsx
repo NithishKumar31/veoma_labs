@@ -133,7 +133,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             </button>
 
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
               <h3 className="text-sm font-bold tracking-wide">Official Invoice & Bill Preview</h3>
               <span className="text-[11px] text-slate-400">({invoiceNo})</span>
             </div>
@@ -143,7 +143,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             <button
               onClick={() => setIsEditing(!isEditing)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition ${
-                isEditing ? 'bg-purple-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                isEditing ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
               }`}
             >
               <Edit3 size={14} />
@@ -177,14 +177,14 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
         {/* Quick Edit Drawer if enabled (Hidden in Print) */}
         {isEditing && (
-          <div className="p-4 bg-purple-50 border-b border-purple-200 text-xs grid grid-cols-1 sm:grid-cols-3 gap-3 print:hidden">
+          <div className="p-4 bg-blue-50/60 border-b border-blue-200 text-xs grid grid-cols-1 sm:grid-cols-3 gap-3 print:hidden">
             <div>
               <label className="block font-bold text-slate-700 mb-1">Company Name</label>
               <input
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs font-semibold"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -193,7 +193,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 type="text"
                 value={companyGstin}
                 onChange={(e) => setCompanyGstin(e.target.value)}
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs font-semibold"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -202,7 +202,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 type="text"
                 value={companyAddress}
                 onChange={(e) => setCompanyAddress(e.target.value)}
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs"
               />
             </div>
             <div>
@@ -211,7 +211,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 type="text"
                 value={accountNo}
                 onChange={(e) => setAccountNo(e.target.value)}
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs font-mono"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs font-mono"
               />
             </div>
             <div>
@@ -221,14 +221,14 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
                 placeholder="Account Name"
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs mb-1"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs mb-1"
               />
               <input
                 type="text"
                 value={branchName}
                 onChange={(e) => setBranchName(e.target.value)}
                 placeholder="Branch Name"
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs"
               />
             </div>
             <div>
@@ -237,13 +237,13 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 type="text"
                 value={signatoryName}
                 onChange={(e) => setSignatoryName(e.target.value)}
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs font-bold mb-1"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs font-bold mb-1"
               />
               <input
                 type="text"
                 value={signatoryTitle}
                 onChange={(e) => setSignatoryTitle(e.target.value)}
-                className="w-full p-1.5 border border-purple-300 rounded bg-white text-xs"
+                className="w-full p-1.5 border border-blue-300 rounded bg-white text-xs"
               />
             </div>
           </div>
@@ -254,7 +254,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             ========================================================================= */}
         <div className="invoice-print-area bg-white text-slate-900 relative font-sans p-8 sm:p-12 overflow-hidden min-h-[1050px] flex flex-col justify-between select-text">
           
-          {/* Top Geometric Purple Sliced Banner */}
+          {/* Top Geometric Blue Sliced Banner */}
           <div className="absolute top-0 left-0 right-0 h-28 pointer-events-none overflow-hidden">
             <svg
               className="w-full h-full"
@@ -268,11 +268,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 </pattern>
               </defs>
 
-              {/* Main deep purple polygon */}
-              <polygon points="0,0 800,0 800,35 340,75 0,120" fill="#38074d" />
+              {/* Main deep blue polygon */}
+              <polygon points="0,0 800,0 800,35 340,75 0,120" fill="#1e3a8a" />
               
-              {/* Secondary mid-purple polygon */}
-              <polygon points="0,0 460,0 220,95 0,120" fill="#531270" />
+              {/* Secondary mid-blue polygon */}
+              <polygon points="0,0 460,0 220,95 0,120" fill="#2563eb" />
 
               {/* Halftone / Dotted matrix on left facet */}
               <polygon points="30,10 320,10 160,95 0,115" fill="url(#dotPatternTop)" />
@@ -362,8 +362,8 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 ========================================================================= */}
             <div className="mt-8 mb-4">
               
-              {/* Rounded Deep Purple Header Bar */}
-              <div className="bg-[#38074d] text-white rounded-full px-6 py-2.5 flex items-center justify-between text-xs font-extrabold tracking-wider shadow-sm">
+              {/* Rounded Deep Blue Header Bar */}
+              <div className="bg-[#1e3a8a] text-white rounded-full px-6 py-2.5 flex items-center justify-between text-xs font-extrabold tracking-wider shadow-sm">
                 <span className="w-1/2 text-left uppercase">DESCRIPTION</span>
                 <span className="w-1/6 text-left pl-4 uppercase">QTY</span>
                 <span className="w-1/6 text-right pr-4 uppercase">PRICE</span>
@@ -471,7 +471,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
           </div>
 
-          {/* Bottom Right Geometric Purple Sliced Banner */}
+          {/* Bottom Right Geometric Blue Sliced Banner */}
           <div className="absolute bottom-0 right-0 w-80 h-20 pointer-events-none overflow-hidden">
             <svg
               className="w-full h-full"
@@ -485,11 +485,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 </pattern>
               </defs>
 
-              {/* Main deep purple polygon */}
-              <polygon points="80,80 320,80 320,10 180,45" fill="#38074d" />
+              {/* Main deep blue polygon */}
+              <polygon points="80,80 320,80 320,10 180,45" fill="#1e3a8a" />
               
-              {/* Secondary mid-purple polygon */}
-              <polygon points="140,80 320,80 320,25 240,65" fill="#531270" />
+              {/* Secondary mid-blue polygon */}
+              <polygon points="140,80 320,80 320,25 240,65" fill="#2563eb" />
 
               {/* Halftone / Dotted matrix on right facet */}
               <polygon points="180,75 315,75 315,35 240,60" fill="url(#dotPatternBottom)" />

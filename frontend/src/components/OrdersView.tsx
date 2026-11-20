@@ -259,7 +259,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                             setInvoiceOrder(o);
                             setInvoiceModalOpen(true);
                           }}
-                          className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded font-bold text-[11px] flex items-center space-x-1 border border-purple-200 transition cursor-pointer"
+                          className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded font-bold text-[11px] flex items-center space-x-1 border border-blue-200 transition cursor-pointer"
                           title="View & Print Official Bill"
                         >
                           <FileText size={12} />
@@ -355,7 +355,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                       setInvoiceOrder(selectedOrder);
                       setInvoiceModalOpen(true);
                     }}
-                    className="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded font-bold flex items-center space-x-1.5 shadow-xs transition cursor-pointer"
+                    className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold flex items-center space-x-1.5 shadow-xs transition cursor-pointer"
                     title="View and Print Official Bill (Veoma Labs)"
                   >
                     <FileText size={14} />

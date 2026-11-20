@@ -22,9 +22,9 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     width, height = A4 # 595.27 x 841.89
 
     # Palette
-    PURPLE_DARK = colors.HexColor("#38074d")
-    PURPLE_MID = colors.HexColor("#531270")
-    PURPLE_LIGHT = colors.HexColor("#6e1f91")
+    BLUE_DARK = colors.HexColor("#1e3a8a")
+    BLUE_MID = colors.HexColor("#2563eb")
+    BLUE_LIGHT = colors.HexColor("#3b82f6")
     CYAN_LIGHT = colors.HexColor("#00c5d7")
     CYAN_DARK = colors.HexColor("#0288d1")
     TEXT_BLACK = colors.HexColor("#111827")
@@ -32,7 +32,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     LINE_GRAY = colors.HexColor("#d1d5db")
 
     # =========================================================================
-    # 1. TOP GEOMETRIC PURPLE BANNER WITH DOTTED TEXTURE
+    # 1. TOP GEOMETRIC BLUE BANNER WITH DOTTED TEXTURE
     # =========================================================================
     # Layer 1: Dark background wedge across the top
     p1 = c.beginPath()
@@ -42,17 +42,17 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     p1.lineTo(width * 0.45, height - 70)
     p1.lineTo(0, height - 125)
     p1.close()
-    c.setFillColor(PURPLE_DARK)
+    c.setFillColor(BLUE_DARK)
     c.drawPath(p1, fill=1, stroke=0)
 
-    # Layer 2: Secondary purple wedge overlay
+    # Layer 2: Secondary blue wedge overlay
     p2 = c.beginPath()
     p2.moveTo(0, height)
     p2.lineTo(width * 0.58, height)
     p2.lineTo(width * 0.28, height - 95)
     p2.lineTo(0, height - 125)
     p2.close()
-    c.setFillColor(PURPLE_MID)
+    c.setFillColor(BLUE_MID)
     c.drawPath(p2, fill=1, stroke=0)
 
     # Dotted Halftone Pattern on the left facet
@@ -69,7 +69,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     c.setFillAlpha(1.0)
 
     # =========================================================================
-    # 2. BOTTOM RIGHT GEOMETRIC PURPLE BANNER WITH DOTTED TEXTURE
+    # 2. BOTTOM RIGHT GEOMETRIC BLUE BANNER WITH DOTTED TEXTURE
     # =========================================================================
     bp1 = c.beginPath()
     bp1.moveTo(width * 0.48, 0)
@@ -77,7 +77,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     bp1.lineTo(width, 60)
     bp1.lineTo(width * 0.65, 35)
     bp1.close()
-    c.setFillColor(PURPLE_DARK)
+    c.setFillColor(BLUE_DARK)
     c.drawPath(bp1, fill=1, stroke=0)
 
     bp2 = c.beginPath()
@@ -86,7 +86,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     bp2.lineTo(width, 50)
     bp2.lineTo(width * 0.75, 18)
     bp2.close()
-    c.setFillColor(PURPLE_MID)
+    c.setFillColor(BLUE_MID)
     c.drawPath(bp2, fill=1, stroke=0)
 
     # Bottom Dotted pattern
@@ -199,8 +199,8 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     table_w = width - 100 # 495 pt
     header_h = 24
 
-    # Rounded Purple Header Bar
-    c.setFillColor(PURPLE_DARK)
+    # Rounded Deep Blue Header Bar
+    c.setFillColor(BLUE_DARK)
     c.roundRect(table_x, table_top - header_h, table_w, header_h, 6, fill=1, stroke=0)
 
     # Column Titles
