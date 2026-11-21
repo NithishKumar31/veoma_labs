@@ -210,3 +210,60 @@ def add_recurring_expense(
     db.commit()
     db.refresh(rec)
     return rec
+
+@router.delete("/employees/{employee_id}")
+def delete_employee(
+    employee_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    emp = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    name = emp.full_name
+    db.delete(emp)
+    log_audit(db=db, user=admin, action="DELETE", module="EMPLOYEES", record_id=employee_id, remarks=f"Deleted employee {name}")
+    db.commit()
+    return {"message": f"Employee {name} deleted"}
+
+@router.delete("/salaries/{salary_id}")
+def delete_salary(
+    salary_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    sal = db.query(SalaryRecord).filter(SalaryRecord.id == salary_id).first()
+    if not sal:
+        raise HTTPException(status_code=404, detail="Salary record not found")
+    db.delete(sal)
+    log_audit(db=db, user=admin, action="DELETE", module="SALARIES", record_id=salary_id, remarks="Deleted salary record")
+    db.commit()
+    return {"message": "Salary record deleted"}
+
+@router.delete("/rent/{rent_id}")
+def delete_rent(
+    rent_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    rent = db.query(RentRecord).filter(RentRecord.id == rent_id).first()
+    if not rent:
+        raise HTTPException(status_code=404, detail="Rent record not found")
+    db.delete(rent)
+    log_audit(db=db, user=admin, action="DELETE", module="RENT", record_id=rent_id, remarks="Deleted rent record")
+    db.commit()
+    return {"message": "Rent record deleted"}
+
+@router.delete("/recurring/{recurring_id}")
+def delete_recurring(
+    recurring_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    rec = db.query(RecurringExpense).filter(RecurringExpense.id == recurring_id).first()
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recurring expense not found")
+    db.delete(rec)
+    log_audit(db=db, user=admin, action="DELETE", module="RECURRING_EXPENSE", record_id=recurring_id, remarks="Deleted recurring expense")
+    db.commit()
+    return {"message": "Recurring expense deleted"}

@@ -87,3 +87,18 @@ def update_material_rate(
     db.commit()
     db.refresh(rate)
     return rate
+
+@router.delete("/material-rates/{rate_id}")
+def delete_material_rate(
+    rate_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    rate = db.query(MaterialRate).filter(MaterialRate.id == rate_id).first()
+    if not rate:
+        raise HTTPException(status_code=404, detail="Material rate not found")
+    name = rate.material_type
+    db.delete(rate)
+    log_audit(db=db, user=admin, action="DELETE", module="SETTINGS", record_id=rate_id, remarks=f"Deleted material rate {name}")
+    db.commit()
+    return {"message": f"Material rate {name} deleted"}

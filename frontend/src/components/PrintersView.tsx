@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Printer as PrinterIcon, Plus, CheckCircle, Wrench, AlertCircle, X } from 'lucide-react';
+import { Printer as PrinterIcon, Plus, CheckCircle, Wrench, AlertCircle, X, Trash2 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Printer, User } from '../types';
 import { formatCurrency, formatWeight, formatDate } from '../utils/formatters';
@@ -68,6 +68,16 @@ export const PrintersView: React.FC<PrintersViewProps> = ({ currentUser }) => {
     }
   };
 
+  const handleDeletePrinter = async (id: string, printerName: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete printer "${printerName}"?`)) return;
+    try {
+      await apiClient.deletePrinter(id);
+      fetchPrinters();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete printer');
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Header Bar */}
@@ -131,15 +141,24 @@ export const PrintersView: React.FC<PrintersViewProps> = ({ currentUser }) => {
                 </span>
 
                 {isSuperAdmin && (
-                  <select
-                    value={p.status}
-                    onChange={(e) => handleToggleStatus(p, e.target.value)}
-                    className="p-1 border border-slate-300 rounded text-[11px] font-medium"
-                  >
-                    <option value="ACTIVE">Active</option>
-                    <option value="MAINTENANCE">Maintenance</option>
-                    <option value="INACTIVE">Inactive</option>
-                  </select>
+                  <div className="flex items-center space-x-1.5">
+                    <select
+                      value={p.status}
+                      onChange={(e) => handleToggleStatus(p, e.target.value)}
+                      className="p-1 border border-slate-300 rounded text-[11px] font-medium"
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="MAINTENANCE">Maintenance</option>
+                      <option value="INACTIVE">Inactive</option>
+                    </select>
+                    <button
+                      onClick={() => handleDeletePrinter(p.id, p.name)}
+                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      title="Delete Printer"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 )}
               </div>
 

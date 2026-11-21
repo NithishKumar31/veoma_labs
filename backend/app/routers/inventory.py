@@ -218,3 +218,26 @@ def list_movements(
     if item_id:
         query = query.filter(InventoryMovement.inventory_item_id == item_id)
     return query.order_by(InventoryMovement.created_at.desc()).limit(limit).all()
+
+@router.delete("/items/{item_id}")
+@router.delete("/{item_id}")
+def delete_inventory_item(
+    item_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    item = db.query(InventoryItem).filter(InventoryItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+    name = f"{item.brand} {item.material_type} ({item.colour})"
+    db.delete(item)
+    log_audit(
+        db=db,
+        user=admin,
+        action="DELETE",
+        module="INVENTORY",
+        record_id=item_id,
+        remarks=f"Deleted inventory item {name}"
+    )
+    db.commit()
+    return {"message": f"Inventory item {name} deleted successfully"}

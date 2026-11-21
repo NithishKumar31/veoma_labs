@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Customer, Order, User
 from ..schemas import CustomerCreate, CustomerUpdate, CustomerResponse
-from ..auth import get_current_user, log_audit
+from ..auth import get_current_user, log_audit, require_super_admin
 
 router = APIRouter(prefix="/api/customers", tags=["Customers"])
 
@@ -70,6 +70,28 @@ def create_customer(
     db.commit()
     db.refresh(customer)
     return customer
+
+@router.delete("/{customer_id}")
+def delete_customer(
+    customer_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    name = customer.name
+    db.delete(customer)
+    log_audit(
+        db=db,
+        user=admin,
+        action="DELETE",
+        module="CUSTOMERS",
+        record_id=customer_id,
+        remarks=f"Deleted customer {name}"
+    )
+    db.commit()
+    return {"message": f"Customer {name} deleted successfully"}
 
 @router.get("/{customer_id}")
 def get_customer_details(
@@ -150,3 +172,25 @@ def update_customer(
     db.commit()
     db.refresh(customer)
     return customer
+
+@router.delete("/{customer_id}")
+def delete_customer(
+    customer_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    name = customer.name
+    db.delete(customer)
+    log_audit(
+        db=db,
+        user=admin,
+        action="DELETE",
+        module="CUSTOMERS",
+        record_id=customer_id,
+        remarks=f"Deleted customer {name}"
+    )
+    db.commit()
+    return {"message": f"Customer {name} deleted successfully"}

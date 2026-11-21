@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Database, Download, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Settings, Save, Database, Download, RefreshCw, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { MaterialRate } from '../types';
 import { formatCurrency } from '../utils/formatters';
@@ -53,6 +53,16 @@ export const SettingsView: React.FC = () => {
       fetchSettingsAndBackups();
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to update rate');
+    }
+  };
+
+  const handleDeleteRate = async (id: string, mat: string) => {
+    if (!window.confirm(`Are you sure you want to delete material rate for ${mat}?`)) return;
+    try {
+      await apiClient.deleteMaterialRate(id);
+      fetchSettingsAndBackups();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete material rate');
     }
   };
 
@@ -171,6 +181,7 @@ export const SettingsView: React.FC = () => {
                 <th className="px-4 py-3">Post-Processing Rate / g (₹)</th>
                 <th className="px-4 py-3">Default Wastage %</th>
                 <th className="px-4 py-3">Description / Overheads Included</th>
+                <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -205,6 +216,16 @@ export const SettingsView: React.FC = () => {
                   </td>
                   <td className="px-4 py-3 text-slate-500 text-[11px]">
                     Includes filament, machine depreciation, electricity, labor & time.
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRate(rate.id, rate.material_type)}
+                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      title="Delete Rate"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </td>
                 </tr>
               ))}

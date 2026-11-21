@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Banknote, Plus, Calendar, AlertTriangle, CheckCircle2,
-  Users, Building, Repeat, X
+  Users, Building, Repeat, X, Trash2
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Employee, SalaryRecord, RentRecord, RecurringExpense, User } from '../types';
@@ -150,6 +150,36 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ currentUser }) => {
     }
   };
 
+  const handleDeleteSalary = async (id: string, empName?: string) => {
+    if (!window.confirm(`Delete salary record for ${empName || 'this employee'}?`)) return;
+    try {
+      await apiClient.deleteSalary(id);
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete salary');
+    }
+  };
+
+  const handleDeleteRent = async (id: string, month: string) => {
+    if (!window.confirm(`Delete rent record for ${month}?`)) return;
+    try {
+      await apiClient.deleteRent(id);
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete rent record');
+    }
+  };
+
+  const handleDeleteRecurring = async (id: string, recName: string) => {
+    if (!window.confirm(`Delete recurring overhead "${recName}"?`)) return;
+    try {
+      await apiClient.deleteRecurringExpense(id);
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete recurring expense');
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Tab Switcher */}
@@ -240,12 +270,13 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ currentUser }) => {
                     <th className="px-4 py-3">Amount Paid</th>
                     <th className="px-4 py-3">Balance Remaining</th>
                     <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {salaries.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                      <td colSpan={9} className="px-4 py-8 text-center text-slate-400">
                         No salary entries recorded for {selectedMonth}.
                       </td>
                     </tr>
@@ -271,6 +302,16 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ currentUser }) => {
                           >
                             {s.payment_status}
                           </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSalary(s.id, s.employee_name)}
+                            className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Delete salary entry"
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -310,12 +351,13 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ currentUser }) => {
                   <th className="px-4 py-3">Payment Method</th>
                   <th className="px-4 py-3">Paid To</th>
                   <th className="px-4 py-3">Notes</th>
+                  <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {rentRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                    <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
                       No rent records logged yet.
                     </td>
                   </tr>
@@ -328,6 +370,16 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ currentUser }) => {
                       <td className="px-4 py-3 font-semibold text-slate-700">{r.payment_method}</td>
                       <td className="px-4 py-3 text-slate-700">{r.paid_to}</td>
                       <td className="px-4 py-3 text-slate-400">{r.notes || '-'}</td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRent(r.id, r.rent_month)}
+                          className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                          title="Delete rent record"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -365,9 +417,19 @@ export const FinanceView: React.FC<FinanceViewProps> = ({ currentUser }) => {
                       {rec.category}
                     </span>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
-                    Active
-                  </span>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
+                      Active
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRecurring(rec.id, rec.name)}
+                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      title="Delete recurring overhead"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
                 <div className="pt-2 border-t border-slate-100 flex items-baseline justify-between">
                   <span className="text-slate-400 text-xs">Monthly Cost:</span>

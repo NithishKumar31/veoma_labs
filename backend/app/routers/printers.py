@@ -83,6 +83,28 @@ def add_printer(
     db.refresh(printer)
     return printer
 
+@router.delete("/{printer_id}")
+def delete_printer(
+    printer_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    printer = db.query(Printer).filter(Printer.id == printer_id).first()
+    if not printer:
+        raise HTTPException(status_code=404, detail="Printer not found")
+    name = printer.name
+    db.delete(printer)
+    log_audit(
+        db=db,
+        user=admin,
+        action="DELETE",
+        module="PRINTERS",
+        record_id=printer_id,
+        remarks=f"Deleted printer {name}"
+    )
+    db.commit()
+    return {"message": f"Printer {name} deleted successfully"}
+
 @router.put("/{printer_id}", response_model=PrinterResponse)
 def update_printer(
     printer_id: str,
@@ -123,3 +145,25 @@ def update_printer(
     db.commit()
     db.refresh(printer)
     return printer
+
+@router.delete("/{printer_id}")
+def delete_printer(
+    printer_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    printer = db.query(Printer).filter(Printer.id == printer_id).first()
+    if not printer:
+        raise HTTPException(status_code=404, detail="Printer not found")
+    name = printer.name
+    db.delete(printer)
+    log_audit(
+        db=db,
+        user=admin,
+        action="DELETE",
+        module="PRINTERS",
+        record_id=printer_id,
+        remarks=f"Deleted printer {name}"
+    )
+    db.commit()
+    return {"message": f"Printer {name} deleted successfully"}

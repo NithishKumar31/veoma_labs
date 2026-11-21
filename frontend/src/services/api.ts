@@ -275,6 +275,28 @@ export const apiClient = {
     );
   },
 
+  deleteCustomer: async (id: string) => {
+    return safeApiCall(
+      async () => {
+        const res = await api.delete(`/api/customers/${id}`);
+        try {
+          await deleteDoc(doc(db, 'customers', String(id)));
+        } catch {}
+        return res.data;
+      },
+      async () => {
+        try {
+          await deleteDoc(doc(db, 'customers', String(id)));
+        } catch {}
+        const raw = localStorage.getItem('veoma_local_customers');
+        const list: Customer[] = raw ? JSON.parse(raw) : [];
+        const filtered = list.filter((c) => c.id !== id);
+        localStorage.setItem('veoma_local_customers', JSON.stringify(filtered));
+        return { success: true };
+      }
+    );
+  },
+
   // Orders (with Firebase Cloud Firestore Sync)
   listOrders: async (filters?: any): Promise<Order[]> => {
     return safeApiCall(
@@ -575,6 +597,24 @@ export const apiClient = {
     );
   },
 
+  deleteInventoryItem: async (id: string) => {
+    return safeApiCall(
+      async () => {
+        const res = await api.delete(`/api/inventory/items/${id}`);
+        try {
+          await deleteDoc(doc(db, 'inventory', String(id)));
+        } catch {}
+        return res.data;
+      },
+      async () => {
+        try {
+          await deleteDoc(doc(db, 'inventory', String(id)));
+        } catch {}
+        return { success: true };
+      }
+    );
+  },
+
   // Printers
   listPrinters: async (): Promise<Printer[]> => {
     return safeApiCall(
@@ -594,6 +634,24 @@ export const apiClient = {
     return safeApiCall(
       async () => (await api.put(`/api/printers/${id}`, printer)).data,
       () => ({ id, ...printer })
+    );
+  },
+
+  deletePrinter: async (id: string) => {
+    return safeApiCall(
+      async () => {
+        const res = await api.delete(`/api/printers/${id}`);
+        try {
+          await deleteDoc(doc(db, 'printers', String(id)));
+        } catch {}
+        return res.data;
+      },
+      async () => {
+        try {
+          await deleteDoc(doc(db, 'printers', String(id)));
+        } catch {}
+        return { success: true };
+      }
     );
   },
 
@@ -717,6 +775,13 @@ export const apiClient = {
     );
   },
 
+  deleteEmployee: async (id: string) => {
+    return safeApiCall(
+      async () => (await api.delete(`/api/finance/employees/${id}`)).data,
+      () => ({ success: true })
+    );
+  },
+
   listSalaries: async (month?: string): Promise<SalaryRecord[]> => {
     return safeApiCall(
       async () => (await api.get('/api/finance/salaries', { params: { month } })).data,
@@ -728,6 +793,13 @@ export const apiClient = {
     return safeApiCall(
       async () => (await api.post('/api/finance/salaries', sal)).data,
       () => ({ id: 'sal-' + Date.now(), ...sal, paid_date: new Date().toISOString() })
+    );
+  },
+
+  deleteSalary: async (id: string) => {
+    return safeApiCall(
+      async () => (await api.delete(`/api/finance/salaries/${id}`)).data,
+      () => ({ success: true })
     );
   },
 
@@ -745,6 +817,13 @@ export const apiClient = {
     );
   },
 
+  deleteRent: async (id: string) => {
+    return safeApiCall(
+      async () => (await api.delete(`/api/finance/rent/${id}`)).data,
+      () => ({ success: true })
+    );
+  },
+
   listRecurringExpenses: async (): Promise<RecurringExpense[]> => {
     return safeApiCall(
       async () => (await api.get('/api/finance/recurring')).data,
@@ -756,6 +835,13 @@ export const apiClient = {
     return safeApiCall(
       async () => (await api.post('/api/finance/recurring', rec)).data,
       () => ({ id: 'rec-' + Date.now(), ...rec, is_active: true })
+    );
+  },
+
+  deleteRecurringExpense: async (id: string) => {
+    return safeApiCall(
+      async () => (await api.delete(`/api/finance/recurring/${id}`)).data,
+      () => ({ success: true })
     );
   },
 
@@ -786,6 +872,24 @@ export const apiClient = {
     return safeApiCall(
       async () => (await api.post('/api/workshops', ws)).data,
       () => ({ id: 'ws-' + Date.now(), ...ws, participants: [], expenses: [] })
+    );
+  },
+
+  deleteWorkshop: async (id: string) => {
+    return safeApiCall(
+      async () => {
+        const res = await api.delete(`/api/workshops/${id}`);
+        try {
+          await deleteDoc(doc(db, 'workshops', String(id)));
+        } catch {}
+        return res.data;
+      },
+      async () => {
+        try {
+          await deleteDoc(doc(db, 'workshops', String(id)));
+        } catch {}
+        return { success: true };
+      }
     );
   },
 
@@ -895,6 +999,13 @@ export const apiClient = {
     return safeApiCall(
       async () => (await api.put(`/api/settings/material-rates/${id}`, rate)).data,
       () => ({ id, ...rate })
+    );
+  },
+
+  deleteMaterialRate: async (id: string) => {
+    return safeApiCall(
+      async () => (await api.delete(`/api/settings/material-rates/${id}`)).data,
+      () => ({ success: true })
     );
   },
 

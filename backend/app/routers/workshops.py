@@ -167,3 +167,25 @@ def add_workshop_expense(
     db.commit()
     db.refresh(w_exp)
     return w_exp
+
+@router.delete("/{workshop_id}")
+def delete_workshop(
+    workshop_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_super_admin)
+):
+    ws = db.query(Workshop).filter((Workshop.id == workshop_id) | (Workshop.workshop_code == workshop_id)).first()
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workshop not found")
+    name = ws.name
+    db.delete(ws)
+    log_audit(
+        db=db,
+        user=admin,
+        action="DELETE",
+        module="WORKSHOPS",
+        record_id=workshop_id,
+        remarks=f"Deleted workshop {name}"
+    )
+    db.commit()
+    return {"message": f"Workshop {name} deleted successfully"}

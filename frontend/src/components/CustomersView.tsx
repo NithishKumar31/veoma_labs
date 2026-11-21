@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Users, Search, Plus, Phone, Mail, MapPin, ShoppingBag, Eye, X,
-  UserPlus, CheckCircle2, Building, User as UserIcon, Shield, FileCheck
+  UserPlus, CheckCircle2, Building, User as UserIcon, Shield, FileCheck, Trash2
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Customer } from '../types';
@@ -114,6 +114,20 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       alert(err.response?.data?.detail || 'Failed to register customer');
     } finally {
       setFormSubmitting(false);
+    }
+  };
+
+  const handleDeleteCustomer = async (e: React.MouseEvent, id: string, custName: string) => {
+    e.stopPropagation();
+    if (!window.confirm(`Are you sure you want to permanently delete customer "${custName}"? This action cannot be undone.`)) return;
+    try {
+      await apiClient.deleteCustomer(id);
+      fetchCustomers();
+      if (customerDetails && customerDetails.customer?.id === id) {
+        setCustomerDetails(null);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete customer');
     }
   };
 
@@ -459,9 +473,19 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     )}
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-blue-600 font-semibold">
-                    <span>View Order History & Stats</span>
-                    <span>→</span>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span className="text-blue-600 font-semibold flex items-center space-x-1">
+                      <span>View Order History</span>
+                      <span>→</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteCustomer(e, c.id, c.name)}
+                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      title="Delete Customer"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -481,12 +505,23 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   {customerDetails.customer.customer_code} • {customerDetails.customer.phone}
                 </p>
               </div>
-              <button
-                onClick={() => setCustomerDetails(null)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={(e) => handleDeleteCustomer(e, customerDetails.customer.id, customerDetails.customer.name)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 flex items-center space-x-1 transition cursor-pointer"
+                  title="Delete this customer"
+                >
+                  <Trash2 size={14} />
+                  <span>Delete</span>
+                </button>
+                <button
+                  onClick={() => setCustomerDetails(null)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Boxes, Plus, AlertTriangle, ArrowUpRight, ArrowDownLeft,
-  Search, ShieldAlert, History, Package, X
+  Search, ShieldAlert, History, Package, X, Trash2
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { InventoryItem, InventoryMovement, User } from '../types';
@@ -95,6 +95,16 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ currentUser }) => 
       fetchInventory();
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to adjust stock');
+    }
+  };
+
+  const handleDeleteItem = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete "${name}" from inventory?`)) return;
+    try {
+      await apiClient.deleteInventoryItem(id);
+      fetchInventory();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete inventory item');
     }
   };
 
@@ -217,15 +227,24 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ currentUser }) => 
                     </td>
                     {canManageInventory && (
                       <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => {
-                            setSelectedItemForAdjust(item);
-                            setAdjustModalOpen(true);
-                          }}
-                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold transition"
-                        >
-                          Adjust
-                        </button>
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <button
+                            onClick={() => {
+                              setSelectedItemForAdjust(item);
+                              setAdjustModalOpen(true);
+                            }}
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold transition cursor-pointer"
+                          >
+                            Adjust
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(item.id, `${item.brand} ${item.material_type} (${item.colour})`)}
+                            className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Delete Stock Item"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       </td>
                     )}
                   </tr>

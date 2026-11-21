@@ -273,6 +273,16 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            handleDeleteOrder(o.id);
+                          }}
+                          className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                          title="Delete Order"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setSelectedOrder(o);
                           }}
                           className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100"

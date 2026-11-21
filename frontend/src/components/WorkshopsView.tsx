@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, Plus, Users, Calendar, MapPin, DollarSign,
-  CheckCircle2, Clock, X, AlertCircle, TrendingUp
+  CheckCircle2, Clock, X, AlertCircle, TrendingUp, Trash2
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Workshop } from '../types';
@@ -58,6 +58,20 @@ export const WorkshopsView: React.FC = () => {
   useEffect(() => {
     fetchWorkshops();
   }, []);
+
+  const handleDeleteWorkshop = async (e: React.MouseEvent, id: string, wsName: string) => {
+    e.stopPropagation();
+    if (!window.confirm(`Are you sure you want to permanently delete workshop "${wsName}"?`)) return;
+    try {
+      await apiClient.deleteWorkshop(id);
+      fetchWorkshops();
+      if (selectedWorkshop && (selectedWorkshop.id === id || selectedWorkshop.workshop_code === id)) {
+        setSelectedWorkshop(null);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.detail || err.message || 'Failed to delete workshop');
+    }
+  };
 
   const handleCreateWorkshop = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,9 +166,19 @@ export const WorkshopsView: React.FC = () => {
                 <h4 className="text-sm font-bold text-slate-900 mt-1">{w.name}</h4>
                 <p className="text-[11px] text-slate-400">{w.workshop_code}</p>
               </div>
-              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase">
-                {w.status}
-              </span>
+              <div className="flex items-center space-x-1.5">
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase">
+                  {w.status}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => handleDeleteWorkshop(e, w.id, w.name)}
+                  className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                  title="Delete Workshop"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
 
             <div className="text-xs text-slate-600 space-y-1">
@@ -203,9 +227,20 @@ export const WorkshopsView: React.FC = () => {
                   {selectedWorkshop.workshop_code} • {selectedWorkshop.trainer_name} • Fee: {formatCurrency(selectedWorkshop.registration_fee)}
                 </p>
               </div>
-              <button onClick={() => setSelectedWorkshop(null)} className="text-slate-400 hover:text-white">
-                <X size={20} />
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={(e) => handleDeleteWorkshop(e, selectedWorkshop.id, selectedWorkshop.name)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 flex items-center space-x-1 transition cursor-pointer"
+                  title="Delete this workshop"
+                >
+                  <Trash2 size={14} />
+                  <span>Delete</span>
+                </button>
+                <button onClick={() => setSelectedWorkshop(null)} className="text-slate-400 hover:text-white">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
