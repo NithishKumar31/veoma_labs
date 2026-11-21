@@ -175,6 +175,7 @@ class OrderCreate(BaseModel):
     customer_phone: Optional[str] = None
     customer_email: Optional[str] = None
     customer_address: Optional[str] = None
+    customer_gstin: Optional[str] = None
 
     model_name: str
     expected_delivery_date: Optional[datetime] = None
@@ -228,6 +229,7 @@ class OrderResponse(BaseModel):
     customer_id: str
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
+    customer_gstin: Optional[str] = None
     order_date: datetime
     expected_delivery_date: Optional[datetime]
     model_name: str

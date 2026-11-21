@@ -22,6 +22,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+  const [customerGstin, setCustomerGstin] = useState('');
 
   const [modelName, setModelName] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -210,6 +211,7 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
         customer_phone: newCustomerMode ? customerPhone : undefined,
         customer_email: newCustomerMode ? customerEmail : undefined,
         customer_address: newCustomerMode ? customerAddress : undefined,
+        customer_gstin: customerGstin.trim() ? customerGstin.trim().toUpperCase() : undefined,
         model_name: modelName,
         quantity: Number(quantity),
         expected_delivery_date: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : undefined,
@@ -306,16 +308,36 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                 <select
                   required={!newCustomerMode}
                   value={selectedCustomerId}
-                  onChange={(e) => setSelectedCustomerId(e.target.value)}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedCustomerId(id);
+                    const cust = customers.find((c) => c.id === id);
+                    if (cust && cust.gstin) {
+                      setCustomerGstin(cust.gstin);
+                      setGstApplicable(true);
+                    } else {
+                      setCustomerGstin('');
+                    }
+                  }}
                   className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm"
                 >
                   <option value="">-- Choose Existing Customer --</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name} ({c.phone}) - {c.customer_type}
+                      {c.name} ({c.phone}) - {c.customer_type} {c.gstin ? `[GST: ${c.gstin}]` : ''}
                     </option>
                   ))}
                 </select>
+                {selectedCustomerId && (
+                  <div className="mt-2 text-xs text-slate-600 flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-slate-200">
+                    <span>
+                      Customer GSTIN: <strong className="text-slate-800 font-mono">{customers.find((c) => c.id === selectedCustomerId)?.gstin || 'None (Unregistered)'}</strong>
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Type: {customers.find((c) => c.id === selectedCustomerId)?.customer_type || 'INDIVIDUAL'}
+                    </span>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -344,10 +366,24 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
                 />
                 <input
                   type="text"
+                  placeholder="GSTIN / GST Number (Optional, e.g. 33AAAAA0000A1Z5)"
+                  value={customerGstin}
+                  onChange={(e) => {
+                    const val = e.target.value.toUpperCase();
+                    setCustomerGstin(val);
+                    if (val.trim()) {
+                      setGstApplicable(true);
+                    }
+                  }}
+                  maxLength={15}
+                  className="p-2.5 bg-white border border-slate-300 rounded-lg text-xs uppercase font-mono tracking-wider"
+                />
+                <input
+                  type="text"
                   placeholder="Delivery Address / City"
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="p-2.5 bg-white border border-slate-300 rounded-lg text-xs"
+                  className="sm:col-span-2 p-2.5 bg-white border border-slate-300 rounded-lg text-xs"
                 />
               </div>
             )}

@@ -172,9 +172,9 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     # =========================================================================
     # 4. CUSTOMER "TO:" SECTION (TOP LEFT)
     # =========================================================================
-    cust_name = order_data.get("customer_name", "SRI SAMVARDHINI ,").upper()
-    cust_address = order_data.get("customer_address", "CHENNAI,\nTAMILNADU.").upper()
-    cust_gstin = order_data.get("customer_gstin", "33AFJFS7476L1Z9")
+    cust_name = (order_data.get("customer_name") or "CUSTOMER").upper()
+    cust_address = (order_data.get("customer_address") or "TAMIL NADU").upper()
+    cust_gstin = order_data.get("customer_gstin")
 
     c.setFont("Helvetica-Bold", 9)
     c.drawString(50, 686, "TO:")

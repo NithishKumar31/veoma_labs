@@ -67,6 +67,7 @@ export interface Order {
   customer_id: string;
   customer_name?: string;
   customer_phone?: string;
+  customer_gstin?: string;
   order_date: string;
   expected_delivery_date?: string;
   model_name: string;

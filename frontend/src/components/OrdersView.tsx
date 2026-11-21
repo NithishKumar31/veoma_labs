@@ -230,6 +230,11 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-800">{o.customer_name}</div>
                       <div className="text-[10px] text-slate-400">{o.customer_phone}</div>
+                      {o.customer_gstin && (
+                        <span className="inline-block px-1.5 py-0.5 mt-0.5 text-[9px] font-mono font-medium bg-blue-50 text-blue-700 rounded border border-blue-200">
+                          GST: {o.customer_gstin}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-900 max-w-[160px] truncate" title={o.model_name}>
@@ -388,6 +393,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ currentUser, onOpenCreat
                   </h4>
                   <p className="text-sm font-bold text-slate-900">{selectedOrder.customer_name}</p>
                   <p className="text-slate-600">Phone: {selectedOrder.customer_phone}</p>
+                  {selectedOrder.customer_gstin && (
+                    <p className="text-slate-600">GSTIN: <span className="font-mono font-bold text-slate-800">{selectedOrder.customer_gstin}</span></p>
+                  )}
                   {selectedOrder.place_of_supply && (
                     <p className="text-slate-600">Place of Supply: {selectedOrder.place_of_supply}</p>
                   )}

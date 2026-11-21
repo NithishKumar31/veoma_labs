@@ -80,9 +80,9 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   const invoiceNo = invoiceData?.invoice_no || `VOM${order.order_id.replace(/[^0-9]/g, '').slice(-7) || '2026017'}`;
   const invoiceDate = invoiceData?.invoice_date || new Date(order.order_date).toLocaleDateString('en-GB');
 
-  const customerName = invoiceData?.customer_name || order.customer_name || 'SRI SAMVARDHINI ,';
-  const customerAddress = invoiceData?.customer_address || order.place_of_supply || 'CHENNAI,\nTAMILNADU.';
-  const customerGstin = invoiceData?.customer_gstin || '33AFJFS7476L1Z9';
+  const customerName = invoiceData?.customer_name || order.customer_name || 'CUSTOMER';
+  const customerAddress = invoiceData?.customer_address || order.place_of_supply || 'TAMIL NADU';
+  const customerGstin = invoiceData?.customer_gstin || order.customer_gstin || '';
 
   const items = invoiceData?.items || [
     ...(order.designing_required && Number(order.designing_cost) > 0 ? [{

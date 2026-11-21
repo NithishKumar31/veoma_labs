@@ -125,6 +125,7 @@ def list_orders(
         ord_dict = OrderResponse.from_orm(o)
         ord_dict.customer_name = o.customer.name if o.customer else None
         ord_dict.customer_phone = o.customer.phone if o.customer else None
+        ord_dict.customer_gstin = o.customer.gstin if o.customer else None
         res.append(ord_dict)
     return res
 
@@ -141,6 +142,7 @@ def get_order(
     res = OrderResponse.from_orm(order)
     res.customer_name = order.customer.name if order.customer else None
     res.customer_phone = order.customer.phone if order.customer else None
+    res.customer_gstin = order.customer.gstin if order.customer else None
     return res
 
 @router.post("", response_model=OrderResponse)
@@ -151,8 +153,15 @@ def create_order(
 ):
     # 1. Resolve or create customer
     customer = None
+    clean_gstin = order_in.customer_gstin.strip().upper() if order_in.customer_gstin and order_in.customer_gstin.strip() else None
+
     if order_in.customer_id:
         customer = db.query(Customer).filter(Customer.id == order_in.customer_id).first()
+        if customer and clean_gstin and not customer.gstin:
+            customer.gstin = clean_gstin
+            if customer.customer_type == "INDIVIDUAL":
+                customer.customer_type = "BUSINESS"
+            db.flush()
     elif order_in.customer_phone and order_in.customer_name:
         customer = db.query(Customer).filter(Customer.phone == order_in.customer_phone.strip()).first()
         if not customer:
@@ -162,9 +171,16 @@ def create_order(
                 name=order_in.customer_name.strip(),
                 phone=order_in.customer_phone.strip(),
                 email=order_in.customer_email.strip() if order_in.customer_email else None,
-                address=order_in.customer_address
+                address=order_in.customer_address,
+                gstin=clean_gstin,
+                customer_type="BUSINESS" if clean_gstin else "INDIVIDUAL"
             )
             db.add(customer)
+            db.flush()
+        elif clean_gstin and not customer.gstin:
+            customer.gstin = clean_gstin
+            if customer.customer_type == "INDIVIDUAL":
+                customer.customer_type = "BUSINESS"
             db.flush()
 
     if not customer:
@@ -346,6 +362,7 @@ def create_order(
     res = OrderResponse.from_orm(order)
     res.customer_name = customer.name
     res.customer_phone = customer.phone
+    res.customer_gstin = customer.gstin
     return res
 
 @router.patch("/{order_id}/status", response_model=OrderResponse)
@@ -381,6 +398,7 @@ def update_order_status(
     res = OrderResponse.from_orm(order)
     res.customer_name = order.customer.name if order.customer else None
     res.customer_phone = order.customer.phone if order.customer else None
+    res.customer_gstin = order.customer.gstin if order.customer else None
     return res
 
 @router.post("/{order_id}/payments", response_model=OrderPaymentResponse)
