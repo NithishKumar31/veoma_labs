@@ -58,39 +58,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="p-8 space-y-5">
           {isGitHubPages && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs space-y-1.5 text-amber-900">
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs space-y-1 text-emerald-900">
               <div className="flex items-center space-x-1.5 font-bold">
-                <AlertCircle size={14} className="text-amber-600 flex-shrink-0" />
-                <span>GitHub Pages Notice</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Firebase Cloud Active</span>
               </div>
-              <p className="text-[11px] text-amber-700 leading-normal">
-                GitHub Pages hosts the frontend UI only. The FastAPI backend and SQLite database run locally on your PC.
+              <p className="text-[11px] text-emerald-700 leading-normal">
+                Online mode connected to Firebase Firestore (<span className="font-mono font-medium">veoma-labs</span>). Real-time orders, customers, and expenses.
               </p>
-              <a
-                href="http://localhost:8000"
-                className="inline-block mt-0.5 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded text-[11px] transition shadow-xs"
-              >
-                Open Full System → http://localhost:8000
-              </a>
             </div>
           )}
 
           {error && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs space-y-2">
-              <div className="flex items-start space-x-2">
-                <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-rose-600" />
-                <span className="font-medium leading-relaxed">{error}</span>
-              </div>
-              {isGitHubPages && (
-                <div>
-                  <a
-                    href="http://localhost:8000"
-                    className="inline-block px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[11px] font-semibold transition"
-                  >
-                    Open http://localhost:8000
-                  </a>
-                </div>
-              )}
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs flex items-start space-x-2">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-rose-600" />
+              <span className="font-medium leading-relaxed">{error}</span>
             </div>
           )}
 

@@ -84,8 +84,8 @@ export const Layout: React.FC<LayoutProps> = ({
             <div>
               <h1 className="font-bold text-sm tracking-wide text-white uppercase">VEOMA LABS</h1>
               <div className="flex items-center space-x-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                <span className="text-[10px] text-amber-300 font-medium">Firebase Connected</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-[10px] text-emerald-300 font-medium">Firebase Connected</span>
               </div>
             </div>
           </div>
