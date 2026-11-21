@@ -204,7 +204,15 @@ export const apiClient = {
 
   createCustomer: async (customer: any): Promise<Customer> => {
     return safeApiCall(
-      async () => (await api.post('/api/customers', customer)).data,
+      async () => {
+        const res = await api.post('/api/customers', customer);
+        try {
+          await setDoc(doc(db, 'customers', String(res.data.id)), res.data, { merge: true });
+        } catch (e) {
+          console.warn('Firestore customer sync:', e);
+        }
+        return res.data;
+      },
       async () => {
         const newCust: Customer = {
           id: 'cust-' + Date.now(),
@@ -315,7 +323,15 @@ export const apiClient = {
 
   createOrder: async (order: any): Promise<Order> => {
     return safeApiCall(
-      async () => (await api.post('/api/orders', order)).data,
+      async () => {
+        const res = await api.post('/api/orders', order);
+        try {
+          await setDoc(doc(db, 'orders', String(res.data.id)), res.data, { merge: true });
+        } catch (e) {
+          console.warn('Firestore order sync:', e);
+        }
+        return res.data;
+      },
       async () => {
         const price = Number(order.agreed_selling_price) || 0;
         const courier = Number(order.courier_charge) || 0;
@@ -386,7 +402,13 @@ export const apiClient = {
 
   updateOrderStatus: async (id: string, status: string, notes?: string): Promise<Order> => {
     return safeApiCall(
-      async () => (await api.patch(`/api/orders/${id}/status`, { order_status: status, notes })).data,
+      async () => {
+        const res = await api.patch(`/api/orders/${id}/status`, { order_status: status, notes });
+        try {
+          await setDoc(doc(db, 'orders', String(id)), { order_status: status, updated_at: new Date().toISOString() }, { merge: true });
+        } catch {}
+        return res.data;
+      },
       async () => {
         try {
           await setDoc(doc(db, 'orders', id), { order_status: status, updated_at: new Date().toISOString() }, { merge: true });
@@ -407,7 +429,18 @@ export const apiClient = {
 
   recordPayment: async (orderId: string, payment: any) => {
     return safeApiCall(
-      async () => (await api.post(`/api/orders/${orderId}/payments`, payment)).data,
+      async () => {
+        const res = await api.post(`/api/orders/${orderId}/payments`, payment);
+        try {
+          await setDoc(doc(db, 'orders', String(orderId)), {
+            payment_status: res.data?.payment_status,
+            total_paid: res.data?.total_paid,
+            remaining_balance: res.data?.remaining_balance,
+            updated_at: new Date().toISOString()
+          }, { merge: true });
+        } catch {}
+        return res.data;
+      },
       async () => {
         const raw = localStorage.getItem('veoma_local_orders');
         const list: Order[] = raw ? JSON.parse(raw) : [];
@@ -445,7 +478,13 @@ export const apiClient = {
 
   deleteOrder: async (orderId: string) => {
     return safeApiCall(
-      async () => (await api.delete(`/api/orders/${orderId}`)).data,
+      async () => {
+        const res = await api.delete(`/api/orders/${orderId}`);
+        try {
+          await deleteDoc(doc(db, 'orders', String(orderId)));
+        } catch {}
+        return res.data;
+      },
       async () => {
         try {
           await deleteDoc(doc(db, 'orders', orderId));
@@ -575,7 +614,15 @@ export const apiClient = {
 
   createExpense: async (expense: any): Promise<DailyExpense> => {
     return safeApiCall(
-      async () => (await api.post('/api/expenses', expense)).data,
+      async () => {
+        const res = await api.post('/api/expenses', expense);
+        try {
+          await setDoc(doc(db, 'expenses', String(res.data.id)), res.data, { merge: true });
+        } catch (e) {
+          console.warn('Firestore expense sync warning:', e);
+        }
+        return res.data;
+      },
       async () => {
         const newExp: DailyExpense = {
           id: 'exp-' + Date.now(),
@@ -873,4 +920,27 @@ export const apiClient = {
       () => ({ success: true, message: 'Cloud backup created' })
     );
   },
+
+  syncAllToFirebase: async () => {
+    try {
+      const [orders, customers, printers] = await Promise.all([
+        apiClient.listOrders(),
+        apiClient.listCustomers(),
+        apiClient.listPrinters()
+      ]);
+      for (const c of customers) {
+        await setDoc(doc(db, 'customers', String(c.id)), c, { merge: true });
+      }
+      for (const o of orders) {
+        await setDoc(doc(db, 'orders', String(o.id)), o, { merge: true });
+      }
+      for (const p of printers) {
+        await setDoc(doc(db, 'printers', String(p.id)), p, { merge: true });
+      }
+      return { success: true, total: orders.length + customers.length + printers.length };
+    } catch (err: any) {
+      console.error('Manual Firestore sync error:', err);
+      throw err;
+    }
+  }
 };

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, ShoppingBag, Users, ReceiptText, GraduationCap,
   Boxes, Printer, FileText, Banknote, BarChart3, ShieldCheck,
-  History, Settings, LogOut, Menu, X, PlusCircle, AlertTriangle
+  History, Settings, LogOut, Menu, X, PlusCircle, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import { User } from '../types';
+import { apiClient } from '../services/api';
 
 interface LayoutProps {
   user: User;
@@ -28,6 +29,23 @@ export const Layout: React.FC<LayoutProps> = ({
   children
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState(false);
+
+  const handleSyncFirebase = async () => {
+    if (syncing) return;
+    setSyncing(true);
+    setSyncSuccess(false);
+    try {
+      await apiClient.syncAllToFirebase();
+      setSyncSuccess(true);
+      setTimeout(() => setSyncSuccess(false), 3000);
+    } catch (e) {
+      console.error('Firebase manual sync error:', e);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const isSuperAdmin = user.role === 'SUPER_ADMIN';
   const perms = user.permissions || {};
@@ -83,10 +101,15 @@ export const Layout: React.FC<LayoutProps> = ({
             </div>
             <div>
               <h1 className="font-bold text-sm tracking-wide text-white uppercase">VEOMA LABS</h1>
-              <div className="flex items-center space-x-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-[10px] text-emerald-300 font-medium">Firebase Connected</span>
-              </div>
+              <button
+                onClick={handleSyncFirebase}
+                title="Click to sync all local data to Firebase Cloud"
+                className="flex items-center space-x-1.5 mt-0.5 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 text-[10px] text-emerald-300 font-medium transition cursor-pointer border border-emerald-900/60"
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-amber-400 animate-spin' : 'bg-emerald-400 animate-pulse'}`}></span>
+                <span>{syncing ? 'Syncing...' : syncSuccess ? 'Cloud Synced!' : 'Firebase Cloud Sync'}</span>
+                <RefreshCw size={10} className={`text-emerald-400 ${syncing ? 'animate-spin' : ''}`} />
+              </button>
             </div>
           </div>
 
