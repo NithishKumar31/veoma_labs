@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  X, Printer, Download, Edit3, Check, CheckCircle2, ArrowLeft,
-  Plus, Trash2, RotateCcw, Sparkles, ShieldCheck
+  X, Printer, Download, Edit3, ArrowLeft,
+  Plus, Trash2, RotateCcw
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Order } from '../types';
@@ -26,14 +26,38 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   
-  // Full Edit Access Mode
+  // Full Edit Access Mode (Active by default)
   const [isEditing, setIsEditing] = useState(true);
+
+  // Editable Labels
+  const [toLabel, setToLabel] = useState('TO:');
+  const [invoiceTypeLabel, setInvoiceTypeLabel] = useState('INVOICE');
+  const [invoiceDateLabel, setInvoiceDateLabel] = useState('Invoice Date:');
+  const [invoiceNoLabel, setInvoiceNoLabel] = useState('Invoice no :');
+  const [gstNoLabel, setGstNoLabel] = useState('GST No. -');
+  const [addressLabel, setAddressLabel] = useState('Address -');
+  const [paymentMethodLabel, setPaymentMethodLabel] = useState('PAYMENT METHOD - CASH / BANK');
+  const [accountNoLabel, setAccountNoLabel] = useState('Account No:');
+  const [accountNameLabel, setAccountNameLabel] = useState('Account Name:');
+  const [branchNameLabel, setBranchNameLabel] = useState('Branch Name:');
+  
+  // Table Column Labels
+  const [descColLabel, setDescColLabel] = useState('DESCRIPTION');
+  const [qtyColLabel, setQtyColLabel] = useState('QTY');
+  const [priceColLabel, setPriceColLabel] = useState('PRICE');
+  const [totalColLabel, setTotalColLabel] = useState('TOTAL');
+
+  // Summary Labels
+  const [subtotalLabel, setSubtotalLabel] = useState('SUB TOTAL');
+  const [gstLabel, setGstLabel] = useState('GST');
+  const [totalLabel, setTotalLabel] = useState('TOTAL');
+  const [courierLabel, setCourierLabel] = useState('Courier charge');
+  const [grandTotalLabel, setGrandTotalLabel] = useState('GRAND TOTAL');
 
   // Editable Overrides - Company & Bank Details
   const [companyName, setCompanyName] = useState('VEOMA LABS');
   const [companyGstin, setCompanyGstin] = useState('33HGMPK9319D1Z7');
   const [companyAddress, setCompanyAddress] = useState('97, Kundalakeshi street, Camp road, Tambaram');
-  const [paymentMethod, setPaymentMethod] = useState('CASH / BANK');
   const [accountNo, setAccountNo] = useState('282101000006844');
   const [accountName, setAccountName] = useState('GOKUL K');
   const [branchName, setBranchName] = useState('SELAIYUR, IOB');
@@ -59,8 +83,8 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
   // Initialize or re-populate data when order changes
   const populateData = (ord: Order, data?: any) => {
-    const invNo = data?.invoice_no || `VOM${ord.order_id.replace(/[^0-9]/g, '').slice(-7) || '2026017'}`;
-    const invDt = data?.invoice_date || new Date(ord.order_date).toLocaleDateString('en-GB');
+    const invNo = data?.invoice_no || `VOM${(ord.order_id || '').replace(/[^0-9]/g, '').slice(-7) || '2026017'}`;
+    const invDt = data?.invoice_date || (ord.order_date ? new Date(ord.order_date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'));
     const cName = (data?.customer_name || ord.customer_name || 'CUSTOMER').toUpperCase();
     const cAddr = (data?.customer_address || ord.place_of_supply || 'TAMIL NADU').toUpperCase();
     const cGst = data?.customer_gstin || ord.customer_gstin || '';
@@ -93,10 +117,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
       }] : []),
       {
         id: 'item-print',
-        description: `Printing(${ord.model_name})`,
+        description: `Printing(${ord.model_name || '3D Model'})`,
         qty: String(ord.quantity || 1),
-        price: Number(ord.agreed_selling_price) - (ord.designing_required ? Number(ord.designing_cost) : 0),
-        total: Number(ord.agreed_selling_price) - (ord.designing_required ? Number(ord.designing_cost) : 0)
+        price: Number(ord.agreed_selling_price || 0) - (ord.designing_required ? Number(ord.designing_cost || 0) : 0),
+        total: Number(ord.agreed_selling_price || 0) - (ord.designing_required ? Number(ord.designing_cost || 0) : 0)
       }
     ];
 
@@ -124,6 +148,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
   useEffect(() => {
     if (isOpen && order) {
+      // 1. Populate immediately so input boxes are NEVER empty
+      populateData(order);
+
+      // 2. Fetch server-side invoice data in background
       setLoading(true);
       apiClient.getOrderInvoiceData(order.id)
         .then((data) => {
@@ -131,8 +159,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
           populateData(order, data);
         })
         .catch((err) => {
-          console.error(err);
-          populateData(order);
+          console.error('Invoice data background fetch:', err);
         })
         .finally(() => setLoading(false));
     }
@@ -193,7 +220,26 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   };
 
   const handleResetToOriginal = () => {
-    if (window.confirm('Reset all edited fields back to the original order values?')) {
+    if (window.confirm('Reset all edited fields and labels back to original order values?')) {
+      setToLabel('TO:');
+      setInvoiceTypeLabel('INVOICE');
+      setInvoiceDateLabel('Invoice Date:');
+      setInvoiceNoLabel('Invoice no :');
+      setGstNoLabel('GST No. -');
+      setAddressLabel('Address -');
+      setPaymentMethodLabel('PAYMENT METHOD - CASH / BANK');
+      setAccountNoLabel('Account No:');
+      setAccountNameLabel('Account Name:');
+      setBranchNameLabel('Branch Name:');
+      setDescColLabel('DESCRIPTION');
+      setQtyColLabel('QTY');
+      setPriceColLabel('PRICE');
+      setTotalColLabel('TOTAL');
+      setSubtotalLabel('SUB TOTAL');
+      setGstLabel('GST');
+      setTotalLabel('TOTAL');
+      setCourierLabel('Courier charge');
+      setGrandTotalLabel('GRAND TOTAL');
       populateData(order, invoiceData);
     }
   };
@@ -204,7 +250,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
       company_name: companyName,
       company_gstin: companyGstin,
       company_address: companyAddress,
-      payment_method: paymentMethod,
+      payment_method: paymentMethodLabel,
       account_no: accountNo,
       account_name: accountName,
       branch_name: branchName,
@@ -292,7 +338,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                   ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-black ring-2 ring-amber-300'
                   : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
               }`}
-              title="Toggle Edit Access for all invoice fields"
+              title="Toggle Edit Access for all invoice fields and labels"
             >
               <Edit3 size={14} className={isEditing ? 'text-slate-950' : 'text-amber-400'} />
               <span>{isEditing ? 'Editing Enabled ✓' : 'Enable Edit Access'}</span>
@@ -302,7 +348,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
               <button
                 onClick={handleResetToOriginal}
                 className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer"
-                title="Reset all values back to original order data"
+                title="Reset all values and labels back to original order data"
               >
                 <RotateCcw size={13} className="text-cyan-400" />
               </button>
@@ -341,11 +387,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="font-bold text-slate-900">Full Edit Access Granted:</span>
               <span className="text-slate-600">
-                You can directly edit customer details, invoice numbers, prices, line items, and totals on the invoice below.
+                You can directly edit every single label and value on this invoice (including Invoice Date, Invoice No, Customer details, Line Items, Prices, Bank details, and Totals).
               </span>
             </div>
             <span className="text-[11px] font-semibold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded">
-              Print & PDF output updates in real-time
+              Real-time update on Print & PDF
             </span>
           </div>
         )}
@@ -388,7 +434,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
               
               {/* LEFT: TO: Customer Details (Editable) */}
               <div className="w-1/2 pr-2 text-xs space-y-1">
-                <span className="font-bold text-slate-900 text-sm block tracking-wide">TO:</span>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={toLabel}
+                    onChange={(e) => setToLabel(e.target.value)}
+                    placeholder="TO:"
+                    className="font-bold text-slate-900 text-sm tracking-wide p-1 rounded bg-blue-50/70 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-28 print:border-none print:bg-transparent print:p-0"
+                    title="Click to edit the 'TO:' label"
+                  />
+                ) : (
+                  <span className="font-bold text-slate-900 text-sm block tracking-wide">{toLabel}</span>
+                )}
                 
                 {isEditing ? (
                   <div className="space-y-1.5 pt-1">
@@ -463,47 +520,102 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                         {companyName}
                       </h1>
                     )}
-                    <p className="text-[11px] font-bold text-slate-700 tracking-[0.25em] uppercase text-right mt-0.5">
-                      INVOICE
-                    </p>
+                    
+                    {isEditing ? (
+                      <div className="flex justify-end mt-0.5">
+                        <input
+                          type="text"
+                          value={invoiceTypeLabel}
+                          onChange={(e) => setInvoiceTypeLabel(e.target.value)}
+                          placeholder="INVOICE"
+                          className="text-[11px] font-bold text-slate-700 tracking-[0.25em] uppercase text-right p-0.5 rounded bg-blue-50/70 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-28 print:border-none print:bg-transparent print:p-0"
+                          title="Click to edit document title (e.g. BILL, INVOICE, ESTIMATE)"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-[11px] font-bold text-slate-700 tracking-[0.25em] uppercase text-right mt-0.5">
+                        {invoiceTypeLabel}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Date & Invoice No */}
-                <div className="text-[11px] text-slate-800 mt-2 space-y-1 font-medium">
-                  <div className="flex items-center justify-end space-x-1">
-                    <span>Invoice Date:</span>
+                {/* Date & Invoice No (Both Labels and Values are 100% Editable) */}
+                <div className="text-[11px] text-slate-800 mt-2 space-y-1.5 font-medium">
+                  {/* Invoice Date row */}
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={invoiceDateLabel}
+                        onChange={(e) => setInvoiceDateLabel(e.target.value)}
+                        placeholder="Invoice Date:"
+                        className="font-medium text-slate-700 text-right p-1 rounded bg-blue-50/60 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-28 print:border-none print:bg-transparent print:p-0"
+                        title="Click to edit the 'Invoice Date:' label"
+                      />
+                    ) : (
+                      <span>{invoiceDateLabel}</span>
+                    )}
+
                     {isEditing ? (
                       <input
                         type="text"
                         value={invoiceDate}
                         onChange={(e) => setInvoiceDate(e.target.value)}
-                        className="font-semibold text-right p-0.5 rounded bg-blue-50/70 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-28 print:border-none print:bg-transparent print:p-0"
+                        placeholder="DD/MM/YYYY"
+                        className="font-bold text-slate-950 text-right p-1 rounded bg-blue-50/80 border border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none w-32 print:border-none print:bg-transparent print:p-0 shadow-2xs"
+                        title="Click to edit the Invoice Date"
                       />
                     ) : (
-                      <span className="font-semibold">{invoiceDate}</span>
+                      <span className="font-semibold text-slate-950">{invoiceDate}</span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end space-x-1">
-                    <span>Invoice no :</span>
+                  {/* Invoice No row */}
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={invoiceNoLabel}
+                        onChange={(e) => setInvoiceNoLabel(e.target.value)}
+                        placeholder="Invoice no :"
+                        className="font-medium text-slate-700 text-right p-1 rounded bg-blue-50/60 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-28 print:border-none print:bg-transparent print:p-0"
+                        title="Click to edit the 'Invoice no :' label"
+                      />
+                    ) : (
+                      <span>{invoiceNoLabel}</span>
+                    )}
+
                     {isEditing ? (
                       <input
                         type="text"
                         value={invoiceNo}
                         onChange={(e) => setInvoiceNo(e.target.value)}
-                        className="font-semibold text-right p-0.5 rounded bg-blue-50/70 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-36 font-mono print:border-none print:bg-transparent print:p-0"
+                        placeholder="VOM..."
+                        className="font-bold text-slate-950 font-mono text-right p-1 rounded bg-blue-50/80 border border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none w-40 print:border-none print:bg-transparent print:p-0 shadow-2xs"
+                        title="Click to edit the Invoice Number"
                       />
                     ) : (
-                      <span className="font-semibold">{invoiceNo}</span>
+                      <span className="font-semibold font-mono text-slate-950">{invoiceNo}</span>
                     )}
                   </div>
                 </div>
 
                 {/* Company GST & Address */}
-                <div className="text-[11px] text-slate-900 mt-2 space-y-1">
-                  <div className="flex items-center justify-end space-x-1">
-                    <span className="font-extrabold tracking-wide">GST No. -</span>
+                <div className="text-[11px] text-slate-900 mt-2 space-y-1.5">
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={gstNoLabel}
+                        onChange={(e) => setGstNoLabel(e.target.value)}
+                        placeholder="GST No. -"
+                        className="font-extrabold text-slate-800 text-right p-0.5 rounded bg-blue-50/60 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-24 print:border-none print:bg-transparent print:p-0"
+                      />
+                    ) : (
+                      <span className="font-extrabold tracking-wide">{gstNoLabel}</span>
+                    )}
+                    
                     {isEditing ? (
                       <input
                         type="text"
@@ -516,8 +628,19 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end space-x-1">
-                    <span className="font-medium text-slate-800">Address -</span>
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={addressLabel}
+                        onChange={(e) => setAddressLabel(e.target.value)}
+                        placeholder="Address -"
+                        className="font-medium text-slate-800 text-right p-0.5 rounded bg-blue-50/60 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-24 print:border-none print:bg-transparent print:p-0"
+                      />
+                    ) : (
+                      <span className="font-medium text-slate-800">{addressLabel}</span>
+                    )}
+                    
                     {isEditing ? (
                       <input
                         type="text"
@@ -532,24 +655,34 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 </div>
 
                 {/* Payment Method & Bank Account */}
-                <div className="text-[11px] text-slate-900 mt-2 space-y-1">
-                  <div className="flex items-center justify-end space-x-1">
-                    <span className="font-extrabold">PAYMENT METHOD -</span>
+                <div className="text-[11px] text-slate-900 mt-2 space-y-1.5">
+                  <div className="flex items-center justify-end space-x-1.5">
                     {isEditing ? (
                       <input
                         type="text"
-                        value={paymentMethod}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="font-extrabold text-right p-0.5 rounded bg-blue-50/70 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-32 print:border-none print:bg-transparent print:p-0"
+                        value={paymentMethodLabel}
+                        onChange={(e) => setPaymentMethodLabel(e.target.value)}
+                        className="font-extrabold text-right p-0.5 rounded bg-blue-50/70 border border-blue-300 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none w-64 print:border-none print:bg-transparent print:p-0"
+                        title="Click to edit payment method line"
                       />
                     ) : (
-                      <span className="font-extrabold">{paymentMethod}</span>
+                      <span className="font-extrabold">{paymentMethodLabel}</span>
                     )}
                     <span className="text-emerald-600 font-bold ml-1">✓</span>
                   </div>
 
-                  <div className="flex items-center justify-end space-x-1">
-                    <span className="text-slate-800 font-medium">Account No:</span>
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={accountNoLabel}
+                        onChange={(e) => setAccountNoLabel(e.target.value)}
+                        className="text-slate-800 font-medium text-right p-0.5 rounded bg-blue-50/60 border border-blue-300 w-28 print:border-none print:bg-transparent print:p-0"
+                      />
+                    ) : (
+                      <span className="text-slate-800 font-medium">{accountNoLabel}</span>
+                    )}
+                    
                     {isEditing ? (
                       <input
                         type="text"
@@ -562,8 +695,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end space-x-1">
-                    <span className="text-slate-800 font-medium">Account Name:</span>
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={accountNameLabel}
+                        onChange={(e) => setAccountNameLabel(e.target.value)}
+                        className="text-slate-800 font-medium text-right p-0.5 rounded bg-blue-50/60 border border-blue-300 w-28 print:border-none print:bg-transparent print:p-0"
+                      />
+                    ) : (
+                      <span className="text-slate-800 font-medium">{accountNameLabel}</span>
+                    )}
+                    
                     {isEditing ? (
                       <input
                         type="text"
@@ -576,8 +719,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end space-x-1">
-                    <span className="text-slate-800 font-medium">Branch Name:</span>
+                  <div className="flex items-center justify-end space-x-1.5">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={branchNameLabel}
+                        onChange={(e) => setBranchNameLabel(e.target.value)}
+                        className="text-slate-800 font-medium text-right p-0.5 rounded bg-blue-50/60 border border-blue-300 w-28 print:border-none print:bg-transparent print:p-0"
+                      />
+                    ) : (
+                      <span className="text-slate-800 font-medium">{branchNameLabel}</span>
+                    )}
+                    
                     {isEditing ? (
                       <input
                         type="text"
@@ -595,16 +748,64 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             </div>
 
             {/* =========================================================================
-                TABLE SECTION (FULLY EDITABLE)
+                TABLE SECTION (FULLY EDITABLE COLUMNS & ROWS)
                 ========================================================================= */}
             <div className="mt-8 mb-4">
               
-              {/* Rounded Deep Blue Header Bar */}
+              {/* Rounded Deep Blue Header Bar (Editable Column Headers) */}
               <div className="bg-[#1e3a8a] text-white rounded-full px-6 py-2.5 flex items-center justify-between text-xs font-extrabold tracking-wider shadow-sm">
-                <span className="w-1/2 text-left uppercase">DESCRIPTION</span>
-                <span className="w-1/6 text-left pl-4 uppercase">QTY</span>
-                <span className="w-1/6 text-right pr-4 uppercase">PRICE</span>
-                <span className="w-1/6 text-right uppercase">TOTAL</span>
+                <div className="w-1/2 text-left uppercase">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={descColLabel}
+                      onChange={(e) => setDescColLabel(e.target.value)}
+                      className="bg-blue-900/80 text-white font-extrabold px-1.5 py-0.5 rounded border border-blue-400/50 w-36 outline-none uppercase print:border-none print:bg-transparent print:p-0"
+                      title="Edit column header"
+                    />
+                  ) : (
+                    <span>{descColLabel}</span>
+                  )}
+                </div>
+                <div className="w-1/6 text-left pl-4 uppercase">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={qtyColLabel}
+                      onChange={(e) => setQtyColLabel(e.target.value)}
+                      className="bg-blue-900/80 text-white font-extrabold px-1.5 py-0.5 rounded border border-blue-400/50 w-16 outline-none uppercase print:border-none print:bg-transparent print:p-0"
+                      title="Edit column header"
+                    />
+                  ) : (
+                    <span>{qtyColLabel}</span>
+                  )}
+                </div>
+                <div className="w-1/6 text-right pr-4 uppercase">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={priceColLabel}
+                      onChange={(e) => setPriceColLabel(e.target.value)}
+                      className="bg-blue-900/80 text-white font-extrabold px-1.5 py-0.5 rounded border border-blue-400/50 w-20 outline-none text-right uppercase print:border-none print:bg-transparent print:p-0"
+                      title="Edit column header"
+                    />
+                  ) : (
+                    <span>{priceColLabel}</span>
+                  )}
+                </div>
+                <div className="w-1/6 text-right uppercase">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={totalColLabel}
+                      onChange={(e) => setTotalColLabel(e.target.value)}
+                      className="bg-blue-900/80 text-white font-extrabold px-1.5 py-0.5 rounded border border-blue-400/50 w-20 outline-none text-right uppercase print:border-none print:bg-transparent print:p-0"
+                      title="Edit column header"
+                    />
+                  ) : (
+                    <span>{totalColLabel}</span>
+                  )}
+                </div>
                 {isEditing && <span className="w-8 print:hidden"></span>}
               </div>
 
@@ -723,13 +924,32 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
                 
                 {/* SUB TOTAL */}
                 <div className="flex justify-between items-center text-slate-800 font-semibold">
-                  <span className="uppercase tracking-wider">SUB TOTAL</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={subtotalLabel}
+                      onChange={(e) => setSubtotalLabel(e.target.value)}
+                      className="uppercase tracking-wider font-semibold text-slate-800 p-0.5 rounded bg-blue-50/60 border border-blue-300 w-28 print:border-none print:bg-transparent print:p-0"
+                    />
+                  ) : (
+                    <span className="uppercase tracking-wider">{subtotalLabel}</span>
+                  )}
                   <span className="font-mono text-slate-950">₹{Number(subtotal).toLocaleString('en-IN')}</span>
                 </div>
 
                 {/* GST (Editable) */}
                 <div className="flex justify-between items-center text-slate-800 font-semibold">
-                  <span className="uppercase tracking-wider">GST</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={gstLabel}
+                      onChange={(e) => setGstLabel(e.target.value)}
+                      className="uppercase tracking-wider font-semibold text-slate-800 p-0.5 rounded bg-blue-50/60 border border-blue-300 w-20 print:border-none print:bg-transparent print:p-0"
+                    />
+                  ) : (
+                    <span className="uppercase tracking-wider">{gstLabel}</span>
+                  )}
+                  
                   {isEditing ? (
                     <div className="flex items-center space-x-1">
                       <span className="text-slate-500 font-mono">₹</span>
@@ -747,7 +967,16 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
                 {/* TOTAL */}
                 <div className="flex justify-between items-center text-slate-950 font-bold text-sm pt-0.5">
-                  <span className="uppercase tracking-wider">TOTAL</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={totalLabel}
+                      onChange={(e) => setTotalLabel(e.target.value)}
+                      className="uppercase tracking-wider font-bold text-slate-950 p-0.5 rounded bg-blue-50/60 border border-blue-300 w-20 print:border-none print:bg-transparent print:p-0"
+                    />
+                  ) : (
+                    <span className="uppercase tracking-wider">{totalLabel}</span>
+                  )}
                   <span className="font-mono">₹{Number(totalWithGst).toLocaleString('en-IN')}</span>
                 </div>
 
@@ -756,7 +985,17 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
                 {/* Courier charge (Editable) */}
                 <div className="flex justify-between items-center text-slate-800 font-semibold pt-1">
-                  <span>Courier charge</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={courierLabel}
+                      onChange={(e) => setCourierLabel(e.target.value)}
+                      className="font-semibold text-slate-800 p-0.5 rounded bg-blue-50/60 border border-blue-300 w-32 print:border-none print:bg-transparent print:p-0"
+                    />
+                  ) : (
+                    <span>{courierLabel}</span>
+                  )}
+                  
                   {isEditing ? (
                     <div className="flex items-center space-x-1">
                       <span className="text-slate-500 font-mono">₹</span>
@@ -774,7 +1013,16 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
 
                 {/* GRAND TOTAL */}
                 <div className="flex justify-between items-center text-slate-950 font-black text-base pt-1">
-                  <span className="uppercase tracking-wide">GRAND TOTAL</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={grandTotalLabel}
+                      onChange={(e) => setGrandTotalLabel(e.target.value)}
+                      className="uppercase tracking-wide font-black text-slate-950 p-0.5 rounded bg-blue-50/60 border border-blue-300 w-36 print:border-none print:bg-transparent print:p-0"
+                    />
+                  ) : (
+                    <span className="uppercase tracking-wide">{grandTotalLabel}</span>
+                  )}
                   <span className="font-mono font-black text-blue-900">₹{Number(grandTotal).toLocaleString('en-IN')}</span>
                 </div>
 
