@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Calculator, Info, AlertTriangle } from 'lucide-react';
+import { X, Plus, Trash2, Calculator, Info, AlertTriangle, RefreshCw } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Customer, Printer, MaterialRate } from '../types';
 import { formatCurrency } from '../utils/formatters';
@@ -276,9 +276,24 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({ isOpen, onCl
             <h2 className="text-base font-bold">Create New Order & Production Workflow</h2>
             <p className="text-xs text-cyan-300">Veoma Labs 3D Printing & Designing Production Costing</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-            <X size={20} />
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Refresh the page? Any unsaved form progress will be reloaded.')) {
+                  window.location.reload();
+                }
+              }}
+              title="Refresh page"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center space-x-1 text-xs cursor-pointer"
+            >
+              <RefreshCw size={16} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer">
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Content Form */}

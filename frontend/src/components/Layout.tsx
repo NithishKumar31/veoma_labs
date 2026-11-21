@@ -31,6 +31,14 @@ export const Layout: React.FC<LayoutProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 150);
+  };
 
   const handleSyncFirebase = async () => {
     if (syncing) return;
@@ -79,12 +87,21 @@ export const Layout: React.FC<LayoutProps> = ({
             <p className="text-[10px] text-slate-400">Business Management System</p>
           </div>
         </div>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-1 rounded text-slate-300 hover:text-white hover:bg-slate-800"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleRefresh}
+            title="Refresh page"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition"
+          >
+            <RefreshCw size={18} className={isRefreshing ? 'animate-spin text-cyan-400' : ''} />
+          </button>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-1 rounded text-slate-300 hover:text-white hover:bg-slate-800"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
@@ -240,6 +257,15 @@ export const Layout: React.FC<LayoutProps> = ({
                 <span>← Back to Order Management</span>
               </button>
             )}
+
+            <button
+              onClick={handleRefresh}
+              title="Refresh page and data"
+              className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 hover:text-blue-600 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border border-slate-300 shadow-xs transition cursor-pointer active:scale-95"
+            >
+              <RefreshCw size={14} className={isRefreshing ? 'animate-spin text-blue-600' : 'text-slate-600'} />
+              <span>Refresh</span>
+            </button>
 
             <button
               onClick={onOpenNewOrder}
