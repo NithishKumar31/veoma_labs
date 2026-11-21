@@ -567,7 +567,7 @@ def _build_invoice_payload(order: Order) -> dict:
     if order.designing_required and order.designing_cost > 0:
         items.append({
             "description": f"Designing ({order.model_name})",
-            "qty": "1 job",
+            "qty": "1",
             "price": order.designing_cost,
             "total": order.designing_cost
         })
@@ -578,7 +578,7 @@ def _build_invoice_payload(order: Order) -> dict:
 
     items.append({
         "description": f"Printing({order.model_name})",
-        "qty": f"{order.quantity} pcs" if order.quantity > 1 else "1 job",
+        "qty": str(order.quantity or 1),
         "price": printing_price,
         "total": printing_price
     })

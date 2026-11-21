@@ -219,7 +219,7 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     c.setFillColor(TEXT_BLACK)
     for itm in items:
         desc = itm.get("description", "")
-        qty_str = itm.get("qty", "1 job")
+        qty_str = str(itm.get("qty", "1")).replace("job", "").strip() or "1"
         price_val = itm.get("price", Decimal("0.00"))
         tot_val = itm.get("total", Decimal("0.00"))
 

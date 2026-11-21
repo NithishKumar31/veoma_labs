@@ -84,20 +84,25 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   const customerAddress = invoiceData?.customer_address || order.place_of_supply || 'TAMIL NADU';
   const customerGstin = invoiceData?.customer_gstin || order.customer_gstin || '';
 
-  const items = invoiceData?.items || [
+  const rawItems = invoiceData?.items || [
     ...(order.designing_required && Number(order.designing_cost) > 0 ? [{
       description: `Designing (${order.model_name})`,
-      qty: '1 job',
+      qty: '1',
       price: Number(order.designing_cost),
       total: Number(order.designing_cost)
     }] : []),
     {
       description: `Printing(${order.model_name})`,
-      qty: order.quantity > 1 ? `${order.quantity} pcs` : '1 job',
+      qty: String(order.quantity || 1),
       price: Number(order.agreed_selling_price) - (order.designing_required ? Number(order.designing_cost) : 0),
       total: Number(order.agreed_selling_price) - (order.designing_required ? Number(order.designing_cost) : 0)
     }
   ];
+
+  const items = rawItems.map((item: any) => ({
+    ...item,
+    qty: String(item.qty || '1').replace(/\s*job\s*/gi, '').trim() || '1'
+  }));
 
   const subtotal = invoiceData?.subtotal ?? (Number(order.taxable_value) > 0 ? Number(order.taxable_value) : Number(order.agreed_selling_price));
   const gst = invoiceData?.gst ?? (Number(order.cgst_amount) + Number(order.sgst_amount) + Number(order.igst_amount));
