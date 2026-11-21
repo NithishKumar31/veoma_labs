@@ -660,3 +660,18 @@ def download_order_invoice_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'inline; filename="{filename}"'}
     )
+
+@router.post("/custom-invoice-pdf")
+@router.post("/{order_id}/custom-invoice-pdf")
+def download_custom_invoice_pdf(
+    payload: dict,
+    current_user: User = Depends(get_current_user)
+):
+    pdf_stream = generate_invoice_pdf(payload)
+    inv_no = payload.get("invoice_no") or "Custom"
+    filename = f"Invoice_{inv_no}.pdf"
+    return StreamingResponse(
+        pdf_stream,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'}
+    )

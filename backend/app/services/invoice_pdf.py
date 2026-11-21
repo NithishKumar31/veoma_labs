@@ -216,12 +216,19 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     row_y = table_top - 46
     line_h = 24
 
+    # Helper for float conversion
+    def safe_float(val, default=0.0):
+        try:
+            return float(val) if val is not None else default
+        except (ValueError, TypeError):
+            return default
+
     c.setFillColor(TEXT_BLACK)
     for itm in items:
         desc = itm.get("description", "")
         qty_str = str(itm.get("qty", "1")).replace("job", "").strip() or "1"
-        price_val = itm.get("price", Decimal("0.00"))
-        tot_val = itm.get("total", Decimal("0.00"))
+        price_val = safe_float(itm.get("price"), 0.0)
+        tot_val = safe_float(itm.get("total"), 0.0)
 
         c.setFont("Helvetica", 9.5)
         c.drawString(table_x + 16, row_y, desc)
@@ -240,11 +247,11 @@ def generate_invoice_pdf(order_data: dict) -> io.BytesIO:
     # =========================================================================
     # 6. TOTALS & SUMMARY SECTION (RIGHT-ALIGNED)
     # =========================================================================
-    subtotal = order_data.get("subtotal", Decimal("61000.00"))
-    gst_val = order_data.get("gst", Decimal("10980.00"))
-    total_val = order_data.get("total", Decimal("71980.00"))
-    courier_val = order_data.get("courier_charge", Decimal("4510.00"))
-    grand_total = order_data.get("grand_total", Decimal("76490.00"))
+    subtotal = safe_float(order_data.get("subtotal"), 0.0)
+    gst_val = safe_float(order_data.get("gst"), 0.0)
+    total_val = safe_float(order_data.get("total"), 0.0)
+    courier_val = safe_float(order_data.get("courier_charge"), 0.0)
+    grand_total = safe_float(order_data.get("grand_total"), 0.0)
 
     totals_y = table_bottom_y - 24
     label_x = table_x + 280

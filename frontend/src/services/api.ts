@@ -561,6 +561,26 @@ export const apiClient = {
     return `/api/orders/${orderId}/invoice-pdf?token=${token || ''}`;
   },
 
+  downloadCustomInvoicePdf: async (payload: any) => {
+    try {
+      const res = await api.post('/api/orders/custom-invoice-pdf', payload, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Invoice_${payload.invoice_no || 'Custom'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      // Fallback for static GitHub Pages or server disconnect: trigger native browser print
+      window.print();
+    }
+  },
+
   // Inventory
   listInventory: async (materialType?: string): Promise<InventoryItem[]> => {
     return safeApiCall(
