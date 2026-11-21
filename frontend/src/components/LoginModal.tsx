@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, User as UserIcon, Shield, AlertCircle } from 'lucide-react';
+import { Lock, User as UserIcon, Shield, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { User } from '../types';
 
@@ -10,6 +10,7 @@ interface LoginModalProps {
 export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('Veoma@Admin2026');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,60 +82,80 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1 transition cursor-pointer"
+              >
+                {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                <span>{showPassword ? 'Hide' : 'Show Password'}</span>
+              </button>
+            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <Lock size={16} />
               </div>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm shadow-md transition disabled:opacity-50"
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm shadow-md transition disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
           </button>
 
-          {/* Quick Preset Buttons for Convenience */}
+          {/* Quick Preset Button for Super Admin Only */}
           <div className="pt-4 border-t border-slate-200">
-            <p className="text-[11px] font-semibold text-slate-500 text-center mb-2 uppercase tracking-wider">
-              Quick Sign-In Presets
-            </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                Super Admin Account
+              </p>
               <button
                 type="button"
-                onClick={() => setPresetUser('admin', 'Veoma@Admin2026')}
-                className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded text-[11px] font-medium border border-slate-200 text-center transition"
+                onClick={() => {
+                  setPresetUser('admin', 'Veoma@Admin2026');
+                  setShowPassword(true);
+                }}
+                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline transition cursor-pointer"
               >
-                Super Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => setPresetUser('subadmin1', 'SubAdmin1@2026')}
-                className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded text-[11px] font-medium border border-slate-200 text-center transition"
-              >
-                Sub Admin 1
-              </button>
-              <button
-                type="button"
-                onClick={() => setPresetUser('subadmin2', 'SubAdmin2@2026')}
-                className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded text-[11px] font-medium border border-slate-200 text-center transition"
-              >
-                Sub Admin 2
+                Auto-fill & View
               </button>
             </div>
+            <button
+              type="button"
+              onClick={() => setPresetUser('admin', 'Veoma@Admin2026')}
+              className="w-full py-2 px-3 bg-slate-100 hover:bg-blue-50 hover:border-blue-300 text-slate-800 hover:text-blue-700 rounded-lg text-xs font-medium border border-slate-200 flex items-center justify-between transition cursor-pointer"
+            >
+              <span className="flex items-center space-x-2">
+                <Shield size={14} className="text-blue-600" />
+                <span className="font-semibold">Super Admin</span>
+              </span>
+              <span className="font-mono text-[11px] text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                admin / Veoma@Admin2026
+              </span>
+            </button>
           </div>
         </form>
 
