@@ -5,6 +5,9 @@ __pycache__/
 .venv/
 venv/
 *.db-journal
+*.db
+*.db-shm
+*.db-wal
 
 # Node
 node_modules/

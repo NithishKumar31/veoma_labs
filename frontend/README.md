@@ -1,32 +1,33 @@
-# React + TypeScript + Vite
+# Veoma Labs — Frontend Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Modern, high-contrast React 19 + TypeScript + Vite + Tailwind CSS dashboard and operations portal for Veoma Labs 3D Printing, Designing, Scanning & Technical Training.
 
-Currently, two official plugins are available:
+## Features
+- **Order Management & Live Costing**: Create orders with real-time 3D print costing calculation and pricing engine.
+- **Customer Registry**: Customer registration, billing history, and order tracking.
+- **Interactive Invoicing & PDF Export**: Official invoice preview with authentic cursive signature, custom typography, and print-ready layout.
+- **Financial & Expense Tracking**: Expense logging, daily summaries, workshop financials, and P&L charts.
+- **Hardware & Inventory Registry**: 3D printer fleet status and filament inventory monitoring.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Getting Started
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### 1. Install Dependencies
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 2. Development Mode (with Live Hot-Reloading)
+Ensure your backend server is running on `http://localhost:8000`, then run:
+```bash
+npm run dev
+```
+The frontend will launch at: **http://localhost:5173** (API requests are automatically proxied to the backend on port 8000).
+
+### 3. Production Build
+```bash
+npm run build
+```
+Build output will be bundled into the `dist/` directory.
+
+## Backend Repository
+- **Backend API**: [https://github.com/NithishKumar31/veoma_backend](https://github.com/NithishKumar31/veoma_backend)
