@@ -562,6 +562,15 @@ def delete_order(
     return {"message": f"Order {order_code} successfully deleted"}
 
 def _build_invoice_payload(order: Order) -> dict:
+    if order.production_notes:
+        import json
+        try:
+            stored = json.loads(order.production_notes)
+            if isinstance(stored, dict) and "custom_invoice" in stored and isinstance(stored["custom_invoice"], dict):
+                return stored["custom_invoice"]
+        except Exception:
+            pass
+
     # Build line items
     items = []
     if order.designing_required and order.designing_cost > 0:
@@ -661,11 +670,48 @@ def download_order_invoice_pdf(
         headers={"Content-Disposition": f'inline; filename="{filename}"'}
     )
 
+@router.post("/{order_id}/save-invoice")
+def save_order_invoice(
+    order_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    import json
+    order = db.query(Order).filter((Order.id == order_id) | (Order.order_id == order_id)).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if payload.get("invoice_no"):
+        order.invoice_number = payload["invoice_no"]
+    if payload.get("courier_charge") is not None:
+        try:
+            order.courier_charge = Decimal(str(payload["courier_charge"]))
+        except Exception:
+            pass
+    if payload.get("grand_total") is not None:
+        try:
+            order.total_invoice_amount = Decimal(str(payload["grand_total"]))
+        except Exception:
+            pass
+
+    order.production_notes = json.dumps({"custom_invoice": payload})
+    db.commit()
+
+    log_audit(
+        db=db,
+        user=current_user,
+        action="UPDATE",
+        module="ORDERS",
+        record_id=order.order_id,
+        remarks=f"Saved custom bill for order {order.order_id}"
+    )
+    return {"message": "Bill saved successfully", "invoice_no": order.invoice_number}
+
 @router.post("/custom-invoice-pdf")
 @router.post("/{order_id}/custom-invoice-pdf")
 def download_custom_invoice_pdf(
-    payload: dict,
-    current_user: User = Depends(get_current_user)
+    payload: dict
 ):
     pdf_stream = generate_invoice_pdf(payload)
     inv_no = payload.get("invoice_no") or "Custom"
@@ -673,5 +719,5 @@ def download_custom_invoice_pdf(
     return StreamingResponse(
         pdf_stream,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'inline; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )

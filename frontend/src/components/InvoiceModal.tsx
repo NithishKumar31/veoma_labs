@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, Printer, Download, Edit3, ArrowLeft,
-  Plus, Trash2, RotateCcw
+  Plus, Trash2, RotateCcw, Save, CheckCircle2
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 import { Order } from '../types';
@@ -25,6 +25,8 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
   const [invoiceData, setInvoiceData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Full Edit Access Mode (Active by default)
   const [isEditing, setIsEditing] = useState(true);
@@ -278,6 +280,22 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
     };
   };
 
+  const handleSaveBill = async () => {
+    if (!order) return;
+    setIsSaving(true);
+    setSaveSuccess(false);
+    try {
+      const payload = buildPayload();
+      await apiClient.saveOrderInvoice(order.id, payload);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3500);
+    } catch (err: any) {
+      alert(err.message || 'Failed to save bill');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -286,6 +304,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
     setDownloading(true);
     try {
       const payload = buildPayload();
+      // Auto-save alongside download
+      if (order) {
+        apiClient.saveOrderInvoice(order.id, payload).catch(console.error);
+      }
       await apiClient.downloadCustomInvoicePdf(payload);
     } catch (e) {
       console.error(e);
@@ -354,6 +376,21 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
               </button>
             )}
 
+            {/* Save Bill Button */}
+            <button
+              onClick={handleSaveBill}
+              disabled={isSaving}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition cursor-pointer shadow-sm ${
+                saveSuccess
+                  ? 'bg-emerald-600 text-white ring-2 ring-emerald-300'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+              }`}
+              title="Save all changes to the bill permanently"
+            >
+              <Save size={14} className={isSaving ? 'animate-spin' : ''} />
+              <span>{isSaving ? 'Saving...' : saveSuccess ? 'Saved ✓' : 'Save Bill'}</span>
+            </button>
+
             <button
               onClick={handlePrint}
               className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-sm transition cursor-pointer"
@@ -379,6 +416,20 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             </button>
           </div>
         </div>
+
+        {/* Bill Saved Success Toast */}
+        {saveSuccess && (
+          <div className="bg-emerald-50 border-b border-emerald-300 px-6 py-2.5 flex items-center justify-between text-xs text-emerald-900 print:hidden shadow-xs">
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 size={16} className="text-emerald-600" />
+              <span className="font-bold">Bill Saved Successfully!</span>
+              <span>All customized items, prices, labels, and amounts are permanently stored.</span>
+            </div>
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+              Saved
+            </span>
+          </div>
+        )}
 
         {/* Edit Access Mode Banner */}
         {isEditing && (
@@ -1160,6 +1211,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
             >
               <Edit3 size={14} />
               <span>{isEditing ? 'Preview Mode' : 'Edit Mode'}</span>
+            </button>
+            <button
+              onClick={handleSaveBill}
+              disabled={isSaving}
+              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition cursor-pointer ${
+                saveSuccess
+                  ? 'bg-emerald-600 text-white ring-2 ring-emerald-300'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+              }`}
+            >
+              <Save size={15} className={isSaving ? 'animate-spin' : ''} />
+              <span>{isSaving ? 'Saving...' : saveSuccess ? 'Bill Saved ✓' : 'Save Bill'}</span>
             </button>
             <button
               onClick={handlePrint}

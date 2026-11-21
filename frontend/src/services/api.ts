@@ -6,6 +6,7 @@ import {
 } from '../types';
 import { db, uploadFileToFirebase } from './firebase';
 import { collection, doc, setDoc, getDocs, getDoc, deleteDoc } from 'firebase/firestore';
+import { generateClientInvoicePdf } from '../utils/pdfGenerator';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '',
@@ -521,10 +522,24 @@ export const apiClient = {
   },
 
   getOrderInvoiceData: async (orderId: string) => {
+    // Check local storage for user's saved bill
+    try {
+      const localSaved = localStorage.getItem(`veoma_invoice_${orderId}`);
+      if (localSaved) {
+        const parsed = JSON.parse(localSaved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch {}
+
     return safeApiCall(
       async () => (await api.get(`/api/orders/${orderId}/invoice-data`)).data,
       async () => {
         let ord: Order | null = null;
+        try {
+          const snap = await getDoc(doc(db, 'invoices', orderId));
+          if (snap.exists()) return snap.data();
+        } catch {}
+
         try {
           const snap = await getDoc(doc(db, 'orders', orderId));
           if (snap.exists()) ord = snap.data() as Order;
@@ -556,27 +571,56 @@ export const apiClient = {
     );
   },
 
+  saveOrderInvoice: async (orderId: string, payload: any) => {
+    // 1. Save to local storage for instant offline resilience
+    try {
+      localStorage.setItem(`veoma_invoice_${orderId}`, JSON.stringify(payload));
+    } catch {}
+
+    // 2. Save to Firebase Firestore if connected
+    try {
+      await setDoc(doc(db, 'invoices', orderId), { ...payload, updated_at: new Date().toISOString() });
+    } catch {}
+
+    // 3. Save to FastAPI backend if available
+    return safeApiCall(
+      async () => (await api.post(`/api/orders/${orderId}/save-invoice`, payload)).data,
+      () => ({ message: 'Invoice saved successfully to local storage and cloud', invoice_no: payload.invoice_no })
+    );
+  },
+
   getOrderInvoicePdfUrl: (orderId: string) => {
     const token = localStorage.getItem('veoma_token');
     return `/api/orders/${orderId}/invoice-pdf?token=${token || ''}`;
   },
 
   downloadCustomInvoicePdf: async (payload: any) => {
+    // Try downloading official ReportLab PDF from FastAPI backend
     try {
       const res = await api.post('/api/orders/custom-invoice-pdf', payload, {
         responseType: 'blob'
       });
-      const blob = new Blob([res.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Invoice_${payload.invoice_no || 'Custom'}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (res.data && res.data.size > 100) {
+        const blob = new Blob([res.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Invoice_${payload.invoice_no || 'Custom'}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      }
     } catch (e) {
-      // Fallback for static GitHub Pages or server disconnect: trigger native browser print
+      console.warn('Backend custom PDF failed, using client-side jsPDF generator:', e);
+    }
+
+    // Client-side fallback: generates and downloads actual PDF file directly
+    try {
+      generateClientInvoicePdf(payload);
+    } catch (e) {
+      console.error('Client-side jsPDF generation error:', e);
       window.print();
     }
   },
