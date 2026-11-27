@@ -76,7 +76,7 @@ export function App() {
         onOpenQuickExpense={() => setQuickExpenseModalOpen(true)}
         onNavigateToCustomerRegistry={handleNavigateToCustomerRegistry}
       >
-        {activeTab === 'dashboard' && <DashboardView currentUser={currentUser} />}
+        {activeTab === 'dashboard' && <DashboardView />}
         {activeTab === 'orders' && (
           <OrdersView
             currentUser={currentUser}

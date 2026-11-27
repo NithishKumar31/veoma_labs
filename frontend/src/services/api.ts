@@ -985,12 +985,6 @@ export const apiClient = {
       async () => (await api.get('/api/reports/dashboard', { params: { filter_type: filterType, start_date: startDate, end_date: endDate } })).data,
       async () => {
         let orders: Order[] = [];
-        let expenses: DailyExpense[] = [];
-        let workshops: Workshop[] = [];
-        let salaries: SalaryRecord[] = [];
-        let rentRecords: RentRecord[] = [];
-        let printers: Printer[] = [];
-
         try {
           const snap = await getDocs(collection(db, 'orders'));
           orders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Order));
@@ -998,174 +992,19 @@ export const apiClient = {
           const raw = localStorage.getItem('veoma_local_orders');
           orders = raw ? JSON.parse(raw) : [];
         }
-
-        try {
-          const snap = await getDocs(collection(db, 'expenses'));
-          expenses = snap.docs.map((d) => ({ id: d.id, ...d.data() } as DailyExpense));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_expenses');
-          expenses = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'workshops'));
-          workshops = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Workshop));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_workshops');
-          workshops = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'salaries'));
-          salaries = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SalaryRecord));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_salaries');
-          salaries = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'rent_records'));
-          rentRecords = snap.docs.map((d) => ({ id: d.id, ...d.data() } as RentRecord));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_rent');
-          rentRecords = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'printers'));
-          printers = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Printer));
-        } catch {
-          printers = DEFAULT_PRINTERS;
-        }
-
-        // Date range filtering
-        const now = new Date();
-        let dtStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-        let dtEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-
-        if (filterType === 'TODAY') {
-          dtStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-        } else if (filterType === 'YESTERDAY') {
-          dtStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0, 0);
-          dtEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
-        } else if (filterType === 'THIS_WEEK') {
-          const day = now.getDay();
-          const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-          dtStart = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0);
-        } else if (filterType === 'LAST_MONTH') {
-          dtStart = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
-          dtEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-        } else if (filterType === 'THIS_YEAR') {
-          dtStart = new Date(now.getFullYear(), 0, 1, 0, 0, 0);
-        } else if (startDate && endDate) {
-          dtStart = new Date(startDate);
-          dtEnd = new Date(endDate);
-        }
-
-        const inDateRange = (dateStr?: string) => {
-          if (!dateStr) return true;
-          const d = new Date(dateStr);
-          if (isNaN(d.getTime())) return true;
-          return d >= dtStart && d <= dtEnd;
-        };
-
-        const activeOrders = orders.filter((o) => inDateRange(o.order_date));
-        const effectiveOrders = activeOrders.length > 0 ? activeOrders : orders;
-
-        const activeExpenses = expenses.filter((e) => inDateRange(e.expense_date));
-        const effectiveExpenses = activeExpenses.length > 0 ? activeExpenses : expenses;
-
-        const activeWorkshops = workshops.filter((w) => inDateRange(w.start_date));
-        const effectiveWorkshops = activeWorkshops.length > 0 ? activeWorkshops : workshops;
-
-        // Calculations
-        const orderRev = effectiveOrders.reduce((s, o) => s + (Number(o.agreed_selling_price) || 0), 0);
-        const orderDirectCosts = effectiveOrders.reduce((s, o) => {
-          const cost = Number(o.total_direct_cost);
-          if (!isNaN(cost) && cost > 0) return s + cost;
-          const grossP = Number(o.gross_profit);
-          if (!isNaN(grossP) && grossP > 0) return s + (Number(o.agreed_selling_price || 0) - grossP);
-          return s + (Number(o.agreed_selling_price || 0) * 0.35);
-        }, 0);
-        const orderGrossContrib = Math.max(0, orderRev - orderDirectCosts);
-
-        const wsRev = effectiveWorkshops.reduce((s, w) => s + (Number(w.total_revenue) || 0), 0);
-        const wsExp = effectiveWorkshops.reduce((s, w) => s + (Number(w.total_expenses) || 0), 0);
-        const wsProfit = Math.max(0, wsRev - wsExp);
-
-        const genExp = effectiveExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-        const rentExp = rentRecords.reduce((s, r) => s + (Number(r.amount) || 0), 0);
-        const salExp = salaries.reduce((s, sl) => s + (Number(sl.amount_paid) || 0), 0);
-
-        const totalRevenue = orderRev + wsRev;
-        const totalExpenses = orderDirectCosts + wsExp + genExp + rentExp + salExp;
-        const grossProfit = orderGrossContrib + wsProfit;
-        const netProfit = grossProfit - genExp - rentExp - salExp;
-
-        const totalPaymentsReceived = effectiveOrders.reduce((s, o) => s + (Number(o.total_paid) || Number(o.agreed_selling_price) || 0), 0);
-        const outstandingPayments = effectiveOrders.reduce((s, o) => s + (Number(o.remaining_balance) || 0), 0);
-
-        // Daily chart (last 14 days)
-        const dailyChart = [];
-        for (let i = 13; i >= 0; i--) {
-          const d = new Date(now);
-          d.setDate(d.getDate() - i);
-          const dateStr = d.toISOString().slice(8, 10) + '-' + d.toISOString().slice(5, 7);
-          const dayOrders = orders.filter((o) => o.order_date && o.order_date.startsWith(d.toISOString().slice(0, 10)));
-          const dayExp = expenses.filter((e) => e.expense_date && e.expense_date.startsWith(d.toISOString().slice(0, 10)));
-          dailyChart.push({
-            date: dateStr,
-            revenue: dayOrders.reduce((s, o) => s + (Number(o.agreed_selling_price) || 0), 0),
-            expenses: dayExp.reduce((s, e) => s + (Number(e.amount) || 0), 0)
-          });
-        }
-
-        // Expense category breakdown
-        const catMap: Record<string, number> = {};
-        effectiveExpenses.forEach((e) => {
-          const cat = e.category || 'General';
-          catMap[cat] = (catMap[cat] || 0) + (Number(e.amount) || 0);
-        });
-        const expenseCategoryChart = Object.entries(catMap).map(([name, value]) => ({ name, value }));
-
-        // Printer activity
-        const printerActivityChart = (printers.length > 0 ? printers : DEFAULT_PRINTERS).map((p) => ({
-          printer: p.name,
-          grams: 35,
-          orders: 1
-        }));
-
-        let userRole = 'SUPER_ADMIN';
-        try {
-          const u = localStorage.getItem('veoma_user');
-          if (u) userRole = JSON.parse(u).role;
-        } catch {}
-
+        const rev = orders.reduce((s, o) => s + (Number(o.agreed_selling_price) || 0), 0);
+        const profit = orders.reduce((s, o) => s + (Number(o.gross_profit) || 0), 0);
         return {
-          filter_type: filterType || 'THIS_MONTH',
-          date_start: dtStart.toLocaleDateString('en-GB').replace(/\//g, '-'),
-          date_end: dtEnd.toLocaleDateString('en-GB').replace(/\//g, '-'),
-          total_revenue: totalRevenue,
-          total_expenses: totalExpenses,
-          gross_profit: grossProfit,
-          net_business_profit: netProfit,
-          total_payments_received: totalPaymentsReceived,
-          outstanding_customer_payments: outstandingPayments,
-          total_orders: effectiveOrders.length,
-          completed_orders: effectiveOrders.filter((o) => o.order_status === 'COMPLETED' || o.order_status === 'DELIVERED').length,
-          pending_orders: effectiveOrders.filter((o) => o.order_status !== 'COMPLETED' && o.order_status !== 'DELIVERED' && o.order_status !== 'CANCELLED').length,
-          order_revenue: orderRev,
-          order_gross_contribution: orderGrossContrib,
-          total_workshop_revenue: wsRev,
-          total_workshop_profit: wsProfit,
-          general_expenses: genExp,
-          rent_expenses: rentExp,
-          salary_expenses: salExp,
-          gst_collected: effectiveOrders.reduce((s, o) => s + (Number(o.cgst_amount || 0) + Number(o.sgst_amount || 0) + Number(o.igst_amount || 0)), 0),
-          can_view_profits: userRole === 'SUPER_ADMIN' || !userRole || userRole === 'ADMIN',
-          daily_revenue_chart: dailyChart,
-          expense_category_chart: expenseCategoryChart.length > 0 ? expenseCategoryChart : [{ name: 'Operations', value: genExp || 300 }],
-          printer_activity_chart: printerActivityChart
+          total_revenue: rev,
+          total_profit: profit,
+          profit_margin_pct: rev > 0 ? Math.round((profit / rev) * 100) : 0,
+          active_orders_count: orders.filter((o) => o.order_status !== 'DELIVERED' && o.order_status !== 'CANCELLED').length,
+          completed_orders_count: orders.filter((o) => o.order_status === 'DELIVERED').length,
+          pending_payments_total: orders.reduce((s, o) => s + (Number(o.remaining_balance) || 0), 0),
+          monthly_expenses_total: 0,
+          net_profit: profit,
+          recent_orders: orders.slice(0, 5),
+          revenue_by_month: []
         };
       }
     );
@@ -1174,90 +1013,7 @@ export const apiClient = {
   getProfitAndLoss: async (filterType?: string, startDate?: string, endDate?: string) => {
     return safeApiCall(
       async () => (await api.get('/api/reports/profit-and-loss', { params: { filter_type: filterType, start_date: startDate, end_date: endDate } })).data,
-      async () => {
-        let orders: Order[] = [];
-        let expenses: DailyExpense[] = [];
-        let workshops: Workshop[] = [];
-        let salaries: SalaryRecord[] = [];
-        let rentRecords: RentRecord[] = [];
-
-        try {
-          const snap = await getDocs(collection(db, 'orders'));
-          orders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Order));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_orders');
-          orders = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'expenses'));
-          expenses = snap.docs.map((d) => ({ id: d.id, ...d.data() } as DailyExpense));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_expenses');
-          expenses = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'workshops'));
-          workshops = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Workshop));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_workshops');
-          workshops = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'salaries'));
-          salaries = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SalaryRecord));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_salaries');
-          salaries = raw ? JSON.parse(raw) : [];
-        }
-
-        try {
-          const snap = await getDocs(collection(db, 'rent_records'));
-          rentRecords = snap.docs.map((d) => ({ id: d.id, ...d.data() } as RentRecord));
-        } catch {
-          const raw = localStorage.getItem('veoma_local_rent');
-          rentRecords = raw ? JSON.parse(raw) : [];
-        }
-
-        const orderRev = orders.reduce((s, o) => s + (Number(o.agreed_selling_price) || 0), 0);
-        const orderDirectCosts = orders.reduce((s, o) => {
-          const cost = Number(o.total_direct_cost);
-          if (!isNaN(cost) && cost > 0) return s + cost;
-          return s + (Number(o.agreed_selling_price || 0) * 0.35);
-        }, 0);
-        const orderGrossContrib = Math.max(0, orderRev - orderDirectCosts);
-
-        const wsRev = workshops.reduce((s, w) => s + (Number(w.total_revenue) || 0), 0);
-        const wsExp = workshops.reduce((s, w) => s + (Number(w.total_expenses) || 0), 0);
-        const wsGrossContrib = Math.max(0, wsRev - wsExp);
-
-        const totalGrossContrib = orderGrossContrib + wsGrossContrib;
-        const genExp = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-        const rentExp = rentRecords.reduce((s, r) => s + (Number(r.amount) || 0), 0);
-        const salExp = salaries.reduce((s, sl) => s + (Number(sl.amount_paid) || 0), 0);
-        const totalSharedOverheads = genExp + rentExp + salExp;
-        const netProfit = totalGrossContrib - totalSharedOverheads;
-
-        const now = new Date();
-        return {
-          report_title: 'VEOMA LABS — PROFIT & LOSS STATEMENT',
-          period: `${new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString('en-GB')} to ${now.toLocaleDateString('en-GB')}`,
-          order_revenue: orderRev,
-          order_direct_costs: orderDirectCosts,
-          order_gross_contribution: orderGrossContrib,
-          workshop_revenue: wsRev,
-          workshop_expenses: wsExp,
-          workshop_gross_contribution: wsGrossContrib,
-          total_gross_contribution: totalGrossContrib,
-          general_expenses: genExp,
-          rent_expenses: rentExp,
-          salary_expenses: salExp,
-          total_shared_overheads: totalSharedOverheads,
-          net_business_profit: netProfit
-        };
-      }
+      () => ({ total_revenue: 0, total_cogs: 0, gross_profit: 0, total_operating_expenses: 0, net_profit: 0 })
     );
   },
 

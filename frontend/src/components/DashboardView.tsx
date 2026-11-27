@@ -9,25 +9,18 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { apiClient } from '../services/api';
-import { User, DashboardSummary } from '../types';
+import { DashboardSummary } from '../types';
 import { formatCurrency, formatWeight } from '../utils/formatters';
 
 const COLORS = ['#2563eb', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#64748b'];
 
-interface DashboardViewProps {
-  currentUser?: User | null;
-}
-
-export const DashboardView: React.FC<DashboardViewProps> = ({ currentUser }) => {
+export const DashboardView: React.FC = () => {
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('THIS_MONTH');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
   const [isCustomOpen, setIsCustomOpen] = useState(false);
-
-  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN' ||
-    (localStorage.getItem('veoma_user') ? JSON.parse(localStorage.getItem('veoma_user')!).role === 'SUPER_ADMIN' : true);
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -234,9 +227,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ currentUser }) => 
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
-            {(data?.can_view_profits ?? true) || isSuperAdmin ? (
+            {data?.can_view_profits ? (
               <p className="text-2xl font-bold text-white">
-                {formatCurrency(data?.net_business_profit ?? ((data?.gross_profit ?? 0) - (data?.general_expenses ?? 0) - (data?.rent_expenses ?? 0) - (data?.salary_expenses ?? 0)))}
+                {formatCurrency(data?.net_business_profit)}
               </p>
             ) : (
               <p className="text-sm text-slate-400 italic">Super Admin Restricted</p>
